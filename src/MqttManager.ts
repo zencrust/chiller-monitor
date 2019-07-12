@@ -1,4 +1,5 @@
 import mqtt, { IClientOptions } from "mqtt"
+import { string } from "prop-types";
 
 export interface ServerStatus{
     message: string;
@@ -6,17 +7,19 @@ export interface ServerStatus{
 }
 
 export interface IMessage{
-    time: string,
-    value: number,
+    [id: string] : {[topic: string]: string};
 }
 
-export interface IDisplayMessage{
-    time: string,
-    title: string
+interface ISettings{
+    mqtt_server: string,
+    port: number,
+    user_name: string,
+    password: string,
+    devices:string[]
 }
 
-export default function MqttManager(setServerStatus:(val: ServerStatus) => void, setValues:(val: IDisplayMessage[]) => void){
-    let settings = fetch('assets/config/settings.json')
+export default function MqttManager(setServerStatus:(val: ServerStatus) => void, setValues:(val: IMessage) => void){
+    let settings:Promise<ISettings> = fetch('assets/config/settings.json')
                     .then(x => x.json())
                     .catch(x => console.log(x));
     let clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
@@ -38,7 +41,7 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
         rejectUnauthorized: false
     }
 
-    let data: { [id: string] : IMessage; } = {};
+    let data: IMessage = {};
 
     setServerStatus({message:'Connecting ', color: "info"});
 
@@ -47,19 +50,16 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
         client.on('message', (topic, msg) => {
             //console.log(topic);
 
-            let [_unusedTopicName, tp ] = topic.split('/');
-            let json:IMessage = JSON.parse(msg.toString());            
-            data[tp] = {time: json.time, value: json.value};
-            let val:IDisplayMessage[] = []
-
-            for(let i in data){
-                if(data[i].value === 1){
-                    val.push({title: i, time: data[i].time});
-                }
+            let [device, func, topic_id ] = topic.split('/');
+            if(data[device] === undefined){
+                data[device] = {}
             }
-            
-            val.sort((a, b) => Number(b.time) - Number(a.time));
-            setValues(val);
+            let finalval = msg.toString();
+            if(func === 'dio'){
+                finalval = finalval === '1'? 'ON': 'OFF';
+            }
+            data[device][topic_id] = finalval;           
+            setValues(data);
         });
     }
 
@@ -85,16 +85,22 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
         //console.log(val.mqtt_server, options);
         options.username = val.user_name;
         options.password = val.password;
-        options.protocol = "wss";
+        options.protocol = "ws";
         options.servers = [{
             host: val.mqtt_server,
             port: val.port,
-            protocol: "wss"
+            protocol: "ws"
         }];
         //console.log(val);
         let client  = mqtt.connect(options);
 
-        client.subscribe("dio/#", {qos: 2});
+        // console.log("all dev", `${val.devices}`);
+        val.devices.forEach(dev => {
+            // console.log("topic sub", `${dev}`);
+            client.subscribe(`${dev}/dio/#`);
+            client.subscribe(`${dev}/temp/#`);
+        });
+            
         console.log('connection sub', val.mqtt_server);
         setServerStatus({message:'Connecting ', color: "warning"})
         _registerErrors(client);

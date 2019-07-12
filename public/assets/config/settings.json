@@ -1,6 +1,7 @@
 {
-    "mqtt_server": "postman.cloudmqtt.com",
-    "port":33997,
-    "user_name": "lmhadnaq",
-    "password": "YP-lWgn3cYuL"
+    "mqtt_server": "192.168.225.100",
+    "port":9001,
+    "user_name": "",
+    "password": "",
+    "devices":["esp32_d1"]
 }

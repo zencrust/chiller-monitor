@@ -6,14 +6,14 @@ import AlarmList from '../Alarm/index';
 import Report from '../Report/index';
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IDisplayMessage } from '../../MqttManager';
+import MqttManager, { ServerStatus, IMessage } from '../../MqttManager';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 interface IState {
   collapsed: boolean,
   content: string,
-  alarms: IDisplayMessage[],
+  alarms: IMessage,
   status: ServerStatus
 }
 
@@ -33,7 +33,7 @@ export default class MainLayout extends React.Component<any, IState> {
     this.state = {
       collapsed: false,
       content: "1",
-      alarms: [],
+      alarms: {},
       status: { color: "info", message: "Initializing" }
     };
   }
@@ -42,7 +42,7 @@ export default class MainLayout extends React.Component<any, IState> {
     this.mqtt_sub = MqttManager((val: ServerStatus) => {
       this.setState({ status: val });
     },
-      (val: IDisplayMessage[]) => {
+      (val: IMessage) => {
         this.setState({ alarms: val });
         //console.log(val);
       });
