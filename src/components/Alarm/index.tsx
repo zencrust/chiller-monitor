@@ -14,23 +14,6 @@ function calculateColor(time: number) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function appendzero(num: number) {
-    if (num >= 10) {
-        return num.toString();
-    }
-
-    return "0" + num.toString();
-}
-
-function ToTimeFormat(num: string | Number) {
-    let sec_num = Number(num); // don't forget the second param
-    let hours = Math.floor(sec_num / 3600);
-    let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    let seconds = sec_num - (hours * 3600) - (minutes * 60);
-
-    return appendzero(hours) + ':' + appendzero(minutes) + ':' + appendzero(seconds);
-}
-
 function ShouldPlayAlarm(alarms: IMessage) {
     for (let alarm in alarms) {
         if (Number(alarms[alarm].time) > timeout) {
@@ -54,20 +37,24 @@ function dictToArr(msg: IMessage) {
             values.push({ topic, value: msg[name][topic] })
         }
 
-        retval.push({ name, values });
+        retval.push({ name, values,  });
     }
 
     // console.log(retval);
     return retval;
 }
 
-const AlarmList = (props: { alarms: IMessage }) => {
-
-    let percentage = (time: number) => {
-        return Math.min((time / timeout), 1) * 100;
+function setDisconnect(timeout: boolean){
+    if(timeout){
+        return 'red';
     }
-    let arr = dictToArr(props.alarms);
+    else{
+        return '#FAFAFA';
+    }
+}
 
+const AlarmList = (props: { alarms: IMessage }) => {
+    let arr = dictToArr(props.alarms);
     return (
         <div>
             {arr.map(item => {
@@ -88,38 +75,8 @@ const AlarmList = (props: { alarms: IMessage }) => {
                     </div>
                 )
             })}
-            {/* <List dataSource={dictToArr(props.alarms)} itemLayout="horizontal" 
-                renderItem={item => (
-                    <List.Item style={{ margin: '2px 3px', padding: '5px', minHeight:'100px', marginBottom:'10px'}}>
-                        <List.Item.Meta
-                            title={                               
-                            <div>
-                                <h2>{item.name}</h2>
-                            </div>}
-                            description={
-                                <List dataSource={item.values} itemLayout="vertical"
-                                    renderItem={sub_item => (
-                                        <List.Item.Meta
-                                            title={                               
-                                            <div>
-                                                <h3>{sub_item.topic}</h3>
-                                            </div>}
-
-                                            description={
-                                                <div>
-                                                    <h5>{sub_item.value}</h5>
-                                                </div>
-                                            }
-                                        />
-                                    )}
-                                />
-                            }
-                        />
-                    </List.Item>
-                )}
-            /> */}
         </div>
     )
 }
 
-export default AlarmList
+export default AlarmList;

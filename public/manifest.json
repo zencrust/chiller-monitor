@@ -1,6 +1,6 @@
 {
-  "short_name": "SMART DASHBOARD",
-  "name": "Create SMART DASHBOARD Sample",
+  "short_name": "Chiller Monitor",
+  "name": "Create Chiller Monitor Sample",
   "icons": [
     {
       "src": "favicon.ico",

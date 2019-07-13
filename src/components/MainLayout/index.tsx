@@ -14,6 +14,8 @@ interface IState {
   collapsed: boolean,
   content: string,
   alarms: IMessage,
+  updateTime : number,
+  timeout: boolean,
   status: ServerStatus
 }
 
@@ -25,6 +27,7 @@ let logs = {"log": [
 
 export default class MainLayout extends React.Component<any, IState> {
   mqtt_sub: any;
+  timerID: any;
   /**
    *
    */
@@ -34,6 +37,8 @@ export default class MainLayout extends React.Component<any, IState> {
       collapsed: false,
       content: "1",
       alarms: {},
+      timeout: false,
+      updateTime : 0,
       status: { color: "info", message: "Initializing" }
     };
   }
@@ -43,9 +48,18 @@ export default class MainLayout extends React.Component<any, IState> {
       this.setState({ status: val });
     },
       (val: IMessage) => {
-        this.setState({ alarms: val });
+        this.setState({ alarms: val, updateTime: Date.now(), timeout: false });
         //console.log(val);
       });
+
+      this.timerID = setInterval(
+        () => {
+          if((Date.now() - this.state.updateTime) > 3900){
+            this.setState({ timeout: true });
+          }
+        },
+        4000
+      );
   }
 
   componentWillUnmount() {
@@ -80,7 +94,7 @@ export default class MainLayout extends React.Component<any, IState> {
         <Layout>
           <Header style={{ background: '#fff', padding: 0, textAlign: "center", fontSize: 20 }}>
             <div style={{marginBottom:'10px'}}>
-              <h1 className="title-header" style={{ textTransform: 'uppercase', textOverflow: 'ellipsis' }}>Smart Dashboard</h1>
+              <h1 className="title-header" style={{ textTransform: 'uppercase', textOverflow: 'ellipsis' }}>Chiller Monitor</h1>
               <Alert message={this.state.status.message} type={this.state.status.color} showIcon style={{ textAlign: "left", fontSize: 15, textOverflow: 'ellipsis', textJustify: 'inter-word', textTransform: 'capitalize' }} />
             </div>
           </Header>
@@ -95,7 +109,7 @@ export default class MainLayout extends React.Component<any, IState> {
                 })()}
               </div>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Smart Dashboard 2019 Created by Aimtech</Footer>
+          <Footer style={{ textAlign: 'center' }}>Chiller Monitor 2019 Created by Aimtech</Footer>
         </Layout>
       </Layout>
     );

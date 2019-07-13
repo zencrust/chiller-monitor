@@ -14,6 +14,7 @@ interface ISettings{
     mqtt_server: string,
     port: number,
     user_name: string,
+    protocol: 'wss' | 'ws' | 'mqtt' | 'mqtts' | 'tcp' | 'ssl' | 'wx' | 'wxs',
     password: string,
     devices:string[]
 }
@@ -44,6 +45,7 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
     let data: IMessage = {};
 
     setServerStatus({message:'Connecting ', color: "info"});
+    setValues(data);
 
     let _registerChanges = (client:mqtt.MqttClient) => {
         console.log('_registerChanges');
@@ -85,11 +87,11 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
         //console.log(val.mqtt_server, options);
         options.username = val.user_name;
         options.password = val.password;
-        options.protocol = "ws";
+        options.protocol = val.protocol;
         options.servers = [{
             host: val.mqtt_server,
             port: val.port,
-            protocol: "ws"
+            protocol: val.protocol
         }];
         //console.log(val);
         let client  = mqtt.connect(options);
