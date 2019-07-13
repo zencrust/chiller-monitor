@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/part-monitoring/static/css/main.859ced46.chunk.css",
+    "main.js": "/part-monitoring/static/js/main.3ba52652.chunk.js",
+    "main.js.map": "/part-monitoring/static/js/main.3ba52652.chunk.js.map",
+    "runtime~main.js": "/part-monitoring/static/js/runtime~main.d66d393e.js",
+    "runtime~main.js.map": "/part-monitoring/static/js/runtime~main.d66d393e.js.map",
+    "static/css/2.46439c26.chunk.css": "/part-monitoring/static/css/2.46439c26.chunk.css",
+    "static/js/2.5896b0c8.chunk.js": "/part-monitoring/static/js/2.5896b0c8.chunk.js",
+    "static/js/2.5896b0c8.chunk.js.map": "/part-monitoring/static/js/2.5896b0c8.chunk.js.map",
+    "index.html": "/part-monitoring/index.html",
+    "precache-manifest.973e670919547eac56ea8cbb8e7d08a6.js": "/part-monitoring/precache-manifest.973e670919547eac56ea8cbb8e7d08a6.js",
+    "service-worker.js": "/part-monitoring/service-worker.js",
+    "static/css/2.46439c26.chunk.css.map": "/part-monitoring/static/css/2.46439c26.chunk.css.map",
+    "static/css/main.859ced46.chunk.css.map": "/part-monitoring/static/css/main.859ced46.chunk.css.map"
+  }
+}

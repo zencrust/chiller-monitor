@@ -1,0 +1,8 @@
+{
+    "mqtt_server": "zencrust.cf",
+    "port":9001,
+    "protocol": "wss",
+    "user_name": "",
+    "password": "",
+    "devices":["Chiller1", "Chiller2", "Chiller3", "Chiller4"]
+}
