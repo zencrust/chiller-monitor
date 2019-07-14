@@ -25,6 +25,7 @@ steps:
     docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) .
     docker login -u $(dockerId) -p $(dockerPassword)
     docker push $(dockerId)/$(imageName)
+  displayName: 'Docker build and push'
 
 # - task: Docker@2
 #   inputs:
