@@ -25,15 +25,24 @@ steps:
   inputs:
     containerRegistry: 'DefaultDockerRegistry'
     command: 'login'
+  displayName: 'Docker login'
+
+- task: Docker@2
+  inputs:
+    repository: 'chiller-monitor'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+  displayName: 'Docker building'
 
 - task: Docker@2
   inputs:
     containerRegistry: 'DefaultDockerRegistry'
     repository: 'chiller-monitor'
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
+    command: 'push'
+  displayName: 'Docker push to registry'
 
 - task: Docker@2
   inputs:
     containerRegistry: 'DefaultDockerRegistry'
     command: 'logout'
+  displayName: 'Docker logout'
