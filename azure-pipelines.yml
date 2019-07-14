@@ -21,13 +21,13 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-- task: Docker@2
-  inputs:
-    command: 'login'
-    containerRegistry: $(dockerId)
+# - task: Docker@2
+#   inputs:
+#     command: 'login'
+#     containerRegistry: $(dockerId)
 
 - task: Docker@2
   inputs:
     repository: $(dockerId)
-    command: 'buildAndPush'
+    command: 'build'
     Dockerfile: '**/Dockerfile'
