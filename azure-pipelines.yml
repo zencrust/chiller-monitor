@@ -1,5 +1,6 @@
 # Node.js with React
 # Build a Node.js project that uses React.
+
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
@@ -20,6 +21,13 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-- script: |
-    script: docker build -t $(dockerId)/$(imageName) .
-  displayName: 'docker build'
+- task: Docker@2
+  inputs:
+    command: 'login'
+    containerRegistry: $(dockerId)
+
+- task: Docker@2
+  inputs:
+    repository: $(dockerId)
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
