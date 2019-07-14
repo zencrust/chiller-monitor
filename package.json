@@ -1,8 +1,8 @@
 {
-  "name": "smart-dashboard",
+  "name": "chiller-monitor",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://zencrust.github.io/smart-dashboard",
+  "homepage": "https://chiller.zencrust.cf",
   "dependencies": {
     "@types/jest": "24.0.15",
     "@types/node": "12.6.2",
