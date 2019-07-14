@@ -21,13 +21,19 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-# - task: Docker@2
-#   inputs:
-#     command: 'login'
-#     containerRegistry: $(dockerId)
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DefaultDockerRegistry'
+    command: 'login'
 
 - task: Docker@2
   inputs:
-    repository: $(dockerId)
-    command: 'build'
+    containerRegistry: 'DefaultDockerRegistry'
+    repository: 'chiller-monitor'
+    command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DefaultDockerRegistry'
+    command: 'logout'
