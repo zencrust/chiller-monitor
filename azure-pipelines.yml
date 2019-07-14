@@ -22,12 +22,9 @@ steps:
   displayName: 'yarn install and build'
 
 - script: |
-    docker build -t $(dockerId)/$(imageName) .
-    docker login -u $(dockerId) -p $(pswd)
+    docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) .
+    docker login -u $(dockerId) -p $(dockerPassword)
     docker push $(dockerId)/$(imageName)
-  env:
-    pswd: $(dockerPassword)        # Define dockerPassword in the Variables tab of this pipeline in Pipelines page of web interface
-
 
 # - task: Docker@2
 #   inputs:
