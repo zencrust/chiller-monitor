@@ -19,3 +19,7 @@ steps:
     yarn install
     yarn run build
   displayName: 'yarn install and build'
+
+- script: |
+    script: docker build -t $(dockerId)/$(imageName) .
+  displayName: 'docker build'
