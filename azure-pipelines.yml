@@ -21,28 +21,36 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: 'DefaultDockerRegistry'
-    command: 'login'
-  displayName: 'Docker login'
+- script: |
+    docker build -t $(dockerId)/$(imageName) .
+    docker login -u $(dockerId) -p $(pswd)
+    docker push $(dockerId)/$(imageName)
+  env:
+    pswd: $(dockerPassword)        # Define dockerPassword in the Variables tab of this pipeline in Pipelines page of web interface
 
-- task: Docker@2
-  inputs:
-    repository: 'chiller-monitor'
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-  displayName: 'Docker building'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: 'DefaultDockerRegistry'
-    repository: 'chiller-monitor'
-    command: 'push'
-  displayName: 'Docker push to registry'
+# - task: Docker@2
+#   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
+#     command: 'login'
+#   displayName: 'Docker login'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: 'DefaultDockerRegistry'
-    command: 'logout'
-  displayName: 'Docker logout'
+# - task: Docker@2
+#   inputs:
+#     repository: 'chiller-monitor'
+#     command: 'build'
+#     Dockerfile: '**/Dockerfile'
+#   displayName: 'Docker building'
+
+# - task: Docker@2
+#   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
+#     repository: 'chiller-monitor'
+#     command: 'push'
+#   displayName: 'Docker push to registry'
+
+# - task: Docker@2
+#   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
+#     command: 'logout'
+#   displayName: 'Docker logout'
