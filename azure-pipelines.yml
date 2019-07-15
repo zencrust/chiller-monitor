@@ -21,13 +21,34 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
+- script: |
+    docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) .
+    docker login -u $(dockerId) -p $(dockerPassword)
+    docker push $(dockerId)/$(imageName)
+  displayName: 'Docker build and push'
+
 # - task: Docker@2
 #   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
 #     command: 'login'
-#     containerRegistry: $(dockerId)
+#   displayName: 'Docker login'
 
-- task: Docker@2
-  inputs:
-    repository: $(dockerId)
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
+# - task: Docker@2
+#   inputs:
+#     repository: 'chiller-monitor'
+#     command: 'build'
+#     Dockerfile: '**/Dockerfile'
+#   displayName: 'Docker building'
+
+# - task: Docker@2
+#   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
+#     repository: 'chiller-monitor'
+#     command: 'push'
+#   displayName: 'Docker push to registry'
+
+# - task: Docker@2
+#   inputs:
+#     containerRegistry: 'DefaultDockerRegistry'
+#     command: 'logout'
+#   displayName: 'Docker logout'
