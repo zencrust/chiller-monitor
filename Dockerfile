@@ -3,5 +3,5 @@ COPY ./build /var/www
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY chiller /etc/nginx/sites-enabled/chiller
 COPY mosquitto.conf /etc/mosquitto/conf.d/default.conf
-EXPOSE 80
+EXPOSE 443
 ENTRYPOINT ["nginx","-g","daemon off;"]
