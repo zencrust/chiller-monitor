@@ -21,12 +21,6 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-- script: |
-    docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) .
-    docker login -u $(dockerId) -p $(dockerPassword)
-    docker push $(dockerId)/$(imageName)
-  displayName: 'Docker build and push'
-
 - task: CopyFilesOverSSH@0
   inputs:
     sshEndpoint: 'DO-droplet1'
