@@ -27,15 +27,6 @@ steps:
     docker push $(dockerId)/$(imageName)
   displayName: 'Docker build and push'
 
-- task: GitHubRelease@0
-  inputs:
-    gitHubConnection: 'zencrust'
-    repositoryName: 'zencrust/chiller-monitor'
-    action: 'create'
-    target: '$(Build.SourceVersion)'
-    tagSource: 'manual'
-    isDraft: true
-
 - task: CopyFilesOverSSH@0
   inputs:
     sshEndpoint: 'DO-droplet1'
