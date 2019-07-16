@@ -26,3 +26,14 @@ steps:
     docker login -u $(dockerId) -p $(dockerPassword)
     docker push $(dockerId)/$(imageName)
   displayName: 'Docker build and push'
+
+- task: GitHubRelease@0
+  inputs:
+    gitHubConnection: 'zencrust'
+    repositoryName: 'zencrust/chiller-monitor'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'auto'
+    releaseNotesSource: 'input'
+    assets: 'build/*'
+    isDraft: true
