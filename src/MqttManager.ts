@@ -6,8 +6,16 @@ export interface ServerStatus{
     color: "success" | "error" | "warning" | "info" | undefined;
 }
 
+export interface IDeviceData{
+    [topic: string]: string
+}
+
 export interface IMessage{
-    [id: string] : {[topic: string]: string};
+    [id: string] : { data:IDeviceData, isALive:boolean };
+}
+
+export interface IDeviceStatus{
+    [id: string] : boolean;
 }
 
 interface ISettings{
@@ -42,10 +50,10 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
         rejectUnauthorized: false
     }
 
-    let data: IMessage = {};
-
+    let allDeviceData: IMessage = {};
+    let deviceStatus: IDeviceStatus = {};
     setServerStatus({message:'Connecting ', color: "info"});
-    setValues(data);
+    setValues(allDeviceData);
 
     let _registerChanges = (client:mqtt.MqttClient) => {
         console.log('_registerChanges');
@@ -53,15 +61,27 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
             //console.log(topic);
 
             let [device, func, topic_id ] = topic.split('/');
-            if(data[device] === undefined){
-                data[device] = {}
+            if(allDeviceData[device] === undefined){
+                allDeviceData[device] = {data: {}, isALive: false};
+                deviceStatus[device] = false;
             }
-            let finalval = msg.toString();
-            if(func === 'dio'){
-                finalval = finalval === '1'? 'ON': 'OFF';
+            
+            if(func === 'heartbeat'){
+                allDeviceData[device].isALive = false;
+                //console.log(allDeviceData);
             }
-            data[device][topic_id] = finalval;           
-            setValues(data);
+            else
+            {
+                let finalval = msg.toString();
+                if(func === 'dio'){
+                    finalval = finalval === '1'? 'ON': 'OFF';
+                }
+                
+                allDeviceData[device].isALive = true;
+                allDeviceData[device].data[topic_id] = finalval;    
+            }
+
+            setValues(allDeviceData);
         });
     }
 
@@ -101,6 +121,7 @@ export default function MqttManager(setServerStatus:(val: ServerStatus) => void,
             // console.log("topic sub", `${dev}`);
             client.subscribe(`${dev}/dio/#`);
             client.subscribe(`${dev}/temp/#`);
+            client.subscribe(`${dev}/heartbeat`);
         });
             
         console.log('connection sub', val.mqtt_server);

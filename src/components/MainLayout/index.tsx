@@ -6,17 +6,16 @@ import AlarmList from '../Alarm/index';
 import Report from '../Report/index';
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IMessage } from '../../MqttManager';
+import MqttManager, { ServerStatus, IMessage, IDeviceStatus } from '../../MqttManager';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 interface IState {
   collapsed: boolean,
   content: string,
-  alarms: IMessage,
-  updateTime : number,
-  timeout: boolean,
-  status: ServerStatus
+  data: IMessage,
+  status: ServerStatus,
+  deviceStatus: IDeviceStatus;
 }
 
 let logs = {"log": [
@@ -36,9 +35,8 @@ export default class MainLayout extends React.Component<any, IState> {
     this.state = {
       collapsed: false,
       content: "1",
-      alarms: {},
-      timeout: false,
-      updateTime : 0,
+      data: {},
+      deviceStatus: {},
       status: { color: "info", message: "Initializing" }
     };
   }
@@ -48,18 +46,9 @@ export default class MainLayout extends React.Component<any, IState> {
       this.setState({ status: val });
     },
       (val: IMessage) => {
-        this.setState({ alarms: val, updateTime: Date.now(), timeout: false });
+        this.setState({ data: val });
         //console.log(val);
       });
-
-      this.timerID = setInterval(
-        () => {
-          if((Date.now() - this.state.updateTime) > 3900){
-            this.setState({ timeout: true });
-          }
-        },
-        4000
-      );
   }
 
   componentWillUnmount() {
@@ -102,7 +91,7 @@ export default class MainLayout extends React.Component<any, IState> {
               <div style={{ padding: 24, background: '#fff', minHeight: 360, marginTop:'20px' }}>
                 {(() => {
                   switch (this.state.content) {
-                    case "1": return <AlarmList alarms={this.state.alarms} />;
+                    case "1": return <AlarmList data={this.state.data} />;
                     case "2": return <Report logs={logs.log}/>;
                     default: return <div>Unknown option selected</div>;
                   }
