@@ -26,12 +26,3 @@ steps:
     docker login -u $(dockerId) -p $(dockerPassword)
     docker push $(dockerId)/$(imageName)
   displayName: 'Docker build and push'
-
-- task: CopyFilesOverSSH@0
-  inputs:
-    sshEndpoint: 'DO-droplet1'
-    sourceFolder: 'build'
-    contents: '**'
-    targetFolder: 'chiller'
-    cleanTargetFolder: true
-    failOnEmptySource: true
