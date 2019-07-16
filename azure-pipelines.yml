@@ -21,6 +21,19 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '/build'
+    Contents: '**'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    ArtifactName: 'Version $(Build.BuildNumber)'
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    publishLocation: Container
+    TargetPath: .
+
 - task: CopyFilesOverSSH@0
   inputs:
     sshEndpoint: 'DO-droplet1'
