@@ -36,28 +36,11 @@ steps:
     tagSource: 'manual'
     isDraft: true
 
-# - task: Docker@2
-#   inputs:
-#     containerRegistry: 'DefaultDockerRegistry'
-#     command: 'login'
-#   displayName: 'Docker login'
-
-# - task: Docker@2
-#   inputs:
-#     repository: 'chiller-monitor'
-#     command: 'build'
-#     Dockerfile: '**/Dockerfile'
-#   displayName: 'Docker building'
-
-# - task: Docker@2
-#   inputs:
-#     containerRegistry: 'DefaultDockerRegistry'
-#     repository: 'chiller-monitor'
-#     command: 'push'
-#   displayName: 'Docker push to registry'
-
-# - task: Docker@2
-#   inputs:
-#     containerRegistry: 'DefaultDockerRegistry'
-#     command: 'logout'
-#   displayName: 'Docker logout'
+- task: CopyFilesOverSSH@0
+  inputs:
+    sshEndpoint: 'DO-droplet1'
+    sourceFolder: 'build'
+    contents: '**'
+    targetFolder: 'chiller'
+    cleanTargetFolder: true
+    failOnEmptySource: true
