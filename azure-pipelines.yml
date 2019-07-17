@@ -21,11 +21,18 @@ steps:
     yarn run build
   displayName: 'yarn install and build'
 
-- script: |
-    docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) .
-    docker login -u $(dockerId) -p $(dockerPassword)
-    docker push $(dockerId)/$(imageName)
-  displayName: 'Docker build and push'
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'build'
+    Contents: '**'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    ArtifactName: 'Version $(Build.BuildNumber)'
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    publishLocation: Container
+    TargetPath: .
 
 - task: CopyFilesOverSSH@0
   inputs:
