@@ -4,25 +4,53 @@ import './index.css';
 import { Layout, Menu, Icon, Badge, Alert } from 'antd';
 import AlarmList from '../Alarm/index';
 import Report from '../Report/index';
+import update, { extend } from 'immutability-helper'; // ES6
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IMessage, IDeviceStatus } from '../../MqttManager';
+import MqttManager, { ServerStatus, IDeviceMessages, IDeviceStatus, IMessageType, IChannelType, ISendDeviceValue, setValuesType } from '../../MqttManager';
+import { isBoolean, isString } from 'util';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 interface IState {
   collapsed: boolean,
   content: string,
-  data: IMessage,
+  data: IDeviceMessages[],
   status: ServerStatus,
   deviceStatus: IDeviceStatus;
 }
 
-let logs = {"log": [
-  {"timestamp":"21/06/2019 05:02:00 PM", "station": "Station 1", "time": "00:15:00"},
-  {"timestamp":"21/06/2019 05:01:00 PM", "station": "Station 2", "time": "00:12:00"},
-  {"timestamp":"21/06/2019 04:01:00 PM", "station": "Station 3", "time": "00:23:45"},
-]}
+let logs = {
+  "log": [
+    { "timestamp": "21/06/2019 05:02:00 PM", "station": "Station 1", "time": "00:15:00" },
+    { "timestamp": "21/06/2019 05:01:00 PM", "station": "Station 2", "time": "00:12:00" },
+    { "timestamp": "21/06/2019 04:01:00 PM", "station": "Station 3", "time": "00:23:45" },
+  ]
+}
+
+function isDeviceMessage(x: any): x is IDeviceMessages {
+  return (x as IDeviceMessages).isAlive !== undefined;
+}
+
+function isAliveMessage(x: any): x is ISendDeviceValue<boolean> {
+  return isBoolean((x as ISendDeviceValue<boolean>).value);
+}
+
+function isChannelValue(x: any): x is ISendDeviceValue<IChannelType> {
+  return isString((x as ISendDeviceValue<IChannelType>).value.topic);
+}
+
+extend('$auto', function(value, object) {
+  return object ?
+    update(object, value):
+    update({}, value);
+});
+
+extend('$autoArray', function(value, object) {
+  return object ?
+    update(object, value):
+    update([], value);
+});
 
 export default class MainLayout extends React.Component<any, IState> {
   mqtt_sub: any;
@@ -35,7 +63,7 @@ export default class MainLayout extends React.Component<any, IState> {
     this.state = {
       collapsed: false,
       content: "1",
-      data: {},
+      data: [],
       deviceStatus: {},
       status: { color: "info", message: "Initializing" }
     };
@@ -45,9 +73,43 @@ export default class MainLayout extends React.Component<any, IState> {
     this.mqtt_sub = MqttManager((val: ServerStatus) => {
       this.setState({ status: val });
     },
-      (val: IMessage) => {
-        this.setState({ data: val });
-        //console.log(val);
+      (val: setValuesType) => {
+
+        let index = this.state.data.findIndex((value) => value.name === val.name);
+                  
+        if(isDeviceMessage(val)){
+          if(index === -1){
+            index = this.state.data.length;
+          }
+          this.setState({
+            data: update(this.state.data, { $autoArray: { [index]: { $set: val} } })
+          });
+        }
+
+        else if(isAliveMessage(val)){
+          if(index === -1){
+            index = this.state.data.length;
+          }
+          this.setState({
+            data: update(this.state.data, { $autoArray: { [index]: { $auto: {isAlive: { $set: val.value} } }}})
+          });
+        }
+        else if(isChannelValue(val)){
+          if(index === -1){
+            return;
+          }
+
+          let valindex = this.state.data[index].values.findIndex(x => x.topic === val.value.topic);
+          if(valindex === -1){
+            return;
+          }
+
+          this.setState({
+            data: update(this.state.data, { $autoArray: { [index]: { $auto: {values:{$autoArray: { [valindex]: {value: {$set: val.value.value} }}}}}}})
+          });
+        }
+
+
       });
   }
 
@@ -82,23 +144,23 @@ export default class MainLayout extends React.Component<any, IState> {
         </Sider>
         <Layout>
           <Header style={{ background: '#fff', padding: 0, textAlign: "center", fontSize: 20 }}>
-            <div style={{marginBottom:'10px'}}>
+            <div style={{ marginBottom: '10px' }}>
               <h1 className="title-header" style={{ textTransform: 'uppercase', textOverflow: 'ellipsis' }}>Chiller Monitor</h1>
               <Alert message={this.state.status.message} type={this.state.status.color} showIcon style={{ textAlign: "left", fontSize: 15, textOverflow: 'ellipsis', textJustify: 'inter-word', textTransform: 'capitalize' }} />
             </div>
           </Header>
           <Content style={{ margin: '16px' }}>
-              <div style={{ padding: 24, background: '#fff', minHeight: 360, marginTop:'20px' }}>
-                {(() => {
-                  switch (this.state.content) {
-                    case "1": return <AlarmList data={this.state.data} />;
-                    case "2": return <Report logs={logs.log}/>;
-                    default: return <div>Unknown option selected</div>;
-                  }
-                })()}
-              </div>
+            <div style={{ padding: 24, background: '#fff', minHeight: 360, marginTop: '20px' }}>
+              {(() => {
+                switch (this.state.content) {
+                  case "1": return <AlarmList data={this.state.data} />;
+                  case "2": return <Report logs={logs.log} />;
+                  default: return <div>Unknown option selected</div>;
+                }
+              })()}
+            </div>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Chiller Monitor 2019 Created by Aimtech</Footer>
+          <Footer style={{ textAlign: 'center' }}>Chiller Monitor 2019. {}</Footer>
         </Layout>
       </Layout>
     );
