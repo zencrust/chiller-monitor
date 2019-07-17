@@ -1,44 +1,58 @@
 import React from 'react'
-import { Card, Alert, Statistic  } from 'antd';
-import { IDeviceMessages, IMessageType } from '../../MqttManager';
+import { Card, Alert, Statistic, Progress } from 'antd';
+import { IDeviceMessages, IMessageType, IChannelType } from '../../MqttManager';
 import { isBoolean, isNumber } from 'util';
 
-let setDisconnect  = (isAlive: boolean) => {
-    if(isAlive){
-        return(
-        <div style={{color:'#4EB94A', fontWeight:'bold'}}>
-            Connected
+let setDisconnect = (isAlive: boolean) => {
+    if (isAlive) {
+        return (
+            <div style={{ color: '#4EB94A', fontWeight: 'bold', fontSize:16 }}>
+                Connected
         </div>);
     }
 
     return (
-        <div style={{color: '#ff7f50', fontWeight:'bold'}}>
+        <div style={{ color: '#ff7f50', fontWeight: 'bold', fontSize:18 }}>
             Disconnected
         </div>
     );
 }
-function typeToVal(value:IMessageType){
-    if(isBoolean(value)){
-        return value ? "ON" : "OFF";
+
+
+const ResultTile = (props: { data: IChannelType }) => {
+    let value = props.data;
+    if (isBoolean(value.value)) {
+        let c: "success" | "exception" = value.value ? "success" : "exception";
+        return (
+            <Progress type="circle"
+                percent={100}
+                key={value.topic}
+                status={c}
+            />        
+        );
     }
 
-    if(isNumber(value)){
-        return value.toString();
+    if (isNumber(value.value)) {
+        let c : "success" | "exception" = value.value < 26 ? "success" : "exception";
+        
+        return (
+            <Progress type="circle"
+                percent={value.value}
+                key={value.topic}
+                format={(p) => `${p} ℃`}
+                status={c}
+            />
+        )
     }
 
-    return value;
-}
-
-function valtoResult(value:IMessageType){
-    if(isBoolean(value)){
-        return value ? "#3f8600": "#cf1322";
-    }
-
-    if(isNumber(value)){
-        return (value < 15 && value > 0)? "#3f8600": "#cf1322";
-    }
-
-    return "yellow";
+    return (
+        <Progress type="circle"
+                    percent={100}
+                    key={value.topic}
+                    format={() => `${value.value}`} 
+                    status="exception"
+        />
+    );
 }
 
 
@@ -49,16 +63,13 @@ const AlarmList = (props: { data: IDeviceMessages[] }) => {
             {arr.map(item => {
                 return (
                     <div key={item.name}>
-                        <Card title={item.name} style={{background:'#FAFAFA'}} extra={setDisconnect(item.isAlive)}>
-                            <div style={{display:'flex', flexDirection:'row', flexWrap:'wrap'}}>
+                        <Card title={item.name} style={{ background: '#FAFAFA' }} extra={setDisconnect(item.isAlive)}>
+                            <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                                 {item.values.map(itr => {
                                     return (
-                                        <Statistic title={itr.topic} 
-                                               key={item.name + itr.topic}
-                                               valueStyle={{color: valtoResult(itr.value)}} 
-                                               style={{width:'200px', margin:'5px 5px'}}
-                                               value={typeToVal(itr.value)}
-                                        />
+                                        <Card title={itr.topic} style={{ margin: '5px 5px' }}> 
+                                            <ResultTile data={itr} />
+                                        </Card>
                                     );
                                 })}
                             </div>
