@@ -116,17 +116,17 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
                 devdata[topic_id] = finalval;
                 allDeviceData[device].isAlive = true;
                 
-                if(partUpdate){
-                    setValues({name: device, value:{topic: topic_id, value: finalval}});
-                }
+                // if(partUpdate){
+                //     setValues({name: device, value:{topic: topic_id, value: finalval}});
+                // }
 
                 // allDeviceData[device].isAlive = true;
 
             }
 
-            if(!partUpdate){
-                setValues(dictToArr(device, allDeviceData[device]));
-            }
+            //if(!partUpdate){
+            setValues(dictToArr(device, allDeviceData[device]));
+            //}
         });
     }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Alert  } from 'antd';
+import { Card, Alert, Statistic  } from 'antd';
 import { IDeviceMessages, IMessageType } from '../../MqttManager';
 import { isBoolean, isNumber } from 'util';
 
@@ -31,14 +31,14 @@ function typeToVal(value:IMessageType){
 
 function valtoResult(value:IMessageType){
     if(isBoolean(value)){
-        return value ? "success": "error";
+        return value ? "#3f8600": "#cf1322";
     }
 
     if(isNumber(value)){
-        return (value < 15 && value > 0)? "success": "error";
+        return (value < 15 && value > 0)? "#3f8600": "#cf1322";
     }
 
-    return "warning";
+    return "yellow";
 }
 
 
@@ -53,11 +53,11 @@ const AlarmList = (props: { data: IDeviceMessages[] }) => {
                             <div style={{display:'flex', flexDirection:'row', flexWrap:'wrap'}}>
                                 {item.values.map(itr => {
                                     return (
-                                        <Alert message={itr.topic} 
-                                               key={item.name + itr.topic} 
-                                               type={valtoResult(itr.value)}
+                                        <Statistic title={itr.topic} 
+                                               key={item.name + itr.topic}
+                                               valueStyle={{color: valtoResult(itr.value)}} 
                                                style={{width:'200px', margin:'5px 5px'}}
-                                               description={typeToVal(itr.value)}
+                                               value={typeToVal(itr.value)}
                                         />
                                     );
                                 })}
