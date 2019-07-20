@@ -7,9 +7,9 @@ export interface ServerStatus {
 }
 
 export type IMessageType = number | boolean | "Disconnected";
-export type IDeviceData = Record<string, IMessageType>;
-export type IDeviceAllData = { data: Record<string, IDeviceData>, isAlive: boolean };
-export type IMessage = Record<string, IDeviceAllData>;
+export type IDeviceData = Map<string, IMessageType>;
+export type IDeviceAllData = { data: Map<string, IDeviceData>, isAlive: boolean };
+export type IMessage = Map<string, IDeviceAllData>;
 export type IDeviceStatus = Record<string, boolean>;
 
 interface ISettings {
@@ -21,7 +21,7 @@ interface ISettings {
     devices: string[]
 }
 export type IChannelType = {topic: string, value: IMessageType};
-export type IDeviceMessage = Array<{ topic: string, value: IMessageType }>;
+export type IDeviceMessage = Map<string, IChannelType>;
 
 export interface IDeviceMessages {
     name: string;
@@ -34,16 +34,16 @@ export interface ISendDeviceValue<T>{
     value: T;
 }
 
-function dictToArr(name: string, msg: IDeviceAllData) {
-    let values = Object.keys(msg.data).flatMap(func =>
-        Object.keys(msg.data[func]).map(
-            function (topic) {
-                return { topic, value: msg.data[func][topic] };
-            })
-    );
+// function dictToArr(name: string, msg: IDeviceAllData) {
+//     let values = Object.keys(msg.data).flatMap(func =>
+//         Object.keys(msg.data[func]).map(
+//             function (topic) {
+//                 return { topic, value: msg.data[func][topic] };
+//             })
+//     );
 
-    return { name, values, isAlive: msg.isAlive };
-}
+//     return { name, values, isAlive: msg.isAlive };
+// }
 
 export type setValuesType = IDeviceMessages | ISendDeviceValue<boolean> | ISendDeviceValue<IChannelType>;
 
@@ -70,7 +70,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
         rejectUnauthorized: false
     }
 
-    let allDeviceData: IMessage = {};
+    // let allDeviceData: IMessage = new Map<string, IDeviceAllData>();
     setServerStatus({ message: 'Connecting ', color: "info" });
 
     let _registerChanges = (client: mqtt.MqttClient) => {
@@ -81,22 +81,22 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             let [device, func, topic_id] = topic.split('/');
 
             //console.log(func);
-            let partUpdate = true;
-            if (allDeviceData[device] === undefined) {
-                allDeviceData[device] = { data: {}, isAlive: false };
-                allDeviceData[device].data['dio'] = {};
-                allDeviceData[device].data['temp'] = {};
-                partUpdate = false;
-            }
+            // let partUpdate = true;
+            // if (allDeviceData[device] === undefined) {
+            //     allDeviceData[device] = { data: {}, isAlive: false };
+            //     allDeviceData[device].data['dio'] = {};
+            //     allDeviceData[device].data['temp'] = {};
+            //     partUpdate = false;
+            // }
 
-            let devdata = allDeviceData[device].data[func];
-
+            // let devdata = allDeviceData[device].data[func];
+            //console.log(topic);
             if (func === 'heartbeat') {
-                allDeviceData[device].isAlive = false;
-                if(partUpdate){
+                // allDeviceData[device].isAlive = false;
+                // if(partUpdate){
                     setValues({name: device, value:false});
-                }
-                //console.log(allDeviceData);
+                // }
+                //console.log(topic);
             }
             else {
                 let finalval: IMessageType = 'Disconnected';
@@ -112,12 +112,12 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
                     }
                     //else it should be disconnected
                 }
-                partUpdate = partUpdate && devdata[topic_id] !== undefined;
-                devdata[topic_id] = finalval;
-                allDeviceData[device].isAlive = true;
+                // partUpdate = partUpdate && devdata[topic_id] !== undefined;
+                // devdata[topic_id] = finalval;
+                // allDeviceData[device].isAlive = true;
                 
                 // if(partUpdate){
-                //     setValues({name: device, value:{topic: topic_id, value: finalval}});
+                     setValues({name: device, value:{topic: topic_id, value: finalval}});
                 // }
 
                 // allDeviceData[device].isAlive = true;
@@ -125,7 +125,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             }
 
             //if(!partUpdate){
-            setValues(dictToArr(device, allDeviceData[device]));
+            // setValues(dictToArr(device, allDeviceData[device]));
             //}
         });
     }
@@ -162,13 +162,15 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
         let client = mqtt.connect(options);
 
         // console.log("all dev", `${val.devices}`);
-        val.devices.forEach(dev => {
+        val.devices.forEach(device => {
             // console.log("topic sub", `${dev}`);
-            client.subscribe(`${dev}/dio/#`);
-            client.subscribe(`${dev}/temp/#`);
-            client.subscribe(`${dev}/heartbeat`);
+            client.subscribe(`${device}/dio/#`);
+            client.subscribe(`${device}/temp/#`);
+            client.subscribe(`${device}/heartbeat`);
+            setValues({name: device, value:false});
         });
 
+       
         console.log('connection sub', val.mqtt_server);
         setServerStatus({ message: 'Connecting ', color: "warning" })
         _registerErrors(client);

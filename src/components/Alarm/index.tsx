@@ -2,6 +2,7 @@ import React from 'react'
 import { Card, Alert, Statistic, Progress } from 'antd';
 import { IDeviceMessages, IMessageType, IChannelType } from '../../MqttManager';
 import { isBoolean, isNumber } from 'util';
+import { array } from 'prop-types';
 
 let setDisconnect = (isAlive: boolean) => {
     if (isAlive) {
@@ -55,26 +56,60 @@ const ResultTile = (props: { data: IChannelType }) => {
     );
 }
 
+const DeviceTile = (props: {data: IDeviceMessages}) => {
+    let val = props.data;
+    function deviceValues(device: IDeviceMessages): IChannelType[]{
+        if(device.values.size > 0){
+            return Array.from(device.values.keys()).map(key => device.values.get(key) as IChannelType).sort(
+                (a, b) =>
+                {
+                    let a_bool = isBoolean(a.value);
+                    let b_bool = isBoolean(b.value);
+                    if((a_bool && b_bool))
+                    {
+                        return a.topic < b.topic ? -1 : 1;
+                    }
+                    if(a_bool){
+                        return -1;
+                    }
 
-const AlarmList = (props: { data: IDeviceMessages[] }) => {
+                    if(b_bool){
+                        return 1;
+                    }
+                    
+                    return a.topic < b.topic ? -1 : 1;
+                }
+            );
+        }
+
+        return [];
+    }
+
+    return(
+    <Card title={val.name} style={{ background: '#FAFAFA' }} extra={setDisconnect(val.isAlive)}>
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+            {deviceValues(props.data).map(itr => {
+                return (
+                    <Card title={itr.topic} style={{ margin: '5px 5px' }} key={itr.topic}> 
+                        <ResultTile data={itr} />
+                    </Card>
+                );
+            })}
+        </div>
+
+    </Card>);
+}
+
+const AlarmList = (props: { data: Map<string, IDeviceMessages> }) => {
     let arr = props.data;
+    let deviceArray = Array.from(arr.keys()).map(key => arr.get(key) as IDeviceMessages);
+
     return (
         <div>
-            {arr.map(item => {
+            {deviceArray.map(item => {
                 return (
                     <div key={item.name}>
-                        <Card title={item.name} style={{ background: '#FAFAFA' }} extra={setDisconnect(item.isAlive)}>
-                            <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-                                {item.values.map(itr => {
-                                    return (
-                                        <Card title={itr.topic} style={{ margin: '5px 5px' }}> 
-                                            <ResultTile data={itr} />
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-
-                        </Card>
+                        <DeviceTile data={item}/>
                     </div>
                 )
             })}

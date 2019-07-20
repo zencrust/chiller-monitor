@@ -7,15 +7,16 @@ import Report from '../Report/index';
 import update, { extend } from 'immutability-helper'; // ES6
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IDeviceMessages, IDeviceStatus, IMessageType, IChannelType, ISendDeviceValue, setValuesType } from '../../MqttManager';
+import MqttManager, { ServerStatus, IDeviceMessages, IDeviceMessage, IDeviceStatus, IMessageType, IChannelType, ISendDeviceValue, setValuesType } from '../../MqttManager';
 import { isBoolean, isString } from 'util';
+import { string } from 'prop-types';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 interface IState {
   collapsed: boolean,
   content: string,
-  data: IDeviceMessages[],
+  data: Map<string, IDeviceMessages>,
   status: ServerStatus,
   deviceStatus: IDeviceStatus;
 }
@@ -63,7 +64,7 @@ export default class MainLayout extends React.Component<any, IState> {
     this.state = {
       collapsed: false,
       content: "1",
-      data: [],
+      data: new Map(),
       deviceStatus: {},
       status: { color: "info", message: "Initializing" }
     };
@@ -75,41 +76,80 @@ export default class MainLayout extends React.Component<any, IState> {
     },
       (val: setValuesType) => {
 
-        let index = this.state.data.findIndex((value) => value.name === val.name);
+        //let index = this.state.data.findIndex((value) => value.name === val.name);
                   
         if(isDeviceMessage(val)){
-          if(index === -1){
-            index = this.state.data.length;
-          }
           this.setState({
-            data: update(this.state.data, { $autoArray: { [index]: { $set: val} } })
+            data: update(this.state.data, { [val.name]: { $set: val} })
           });
         }
 
         else if(isAliveMessage(val)){
-          if(index === -1){
-            index = this.state.data.length;
+          let oldVal = this.state.data.get(val.name);
+          if(oldVal !== undefined){
+            if(oldVal.isAlive === val.value)
+            {
+              return;
+            }
+            
+            this.setState({
+              data: update(this.state.data, { [val.name]: { $set: 
+                update(oldVal, {$merge:{isAlive: val.value}})} })
+            });
           }
-          this.setState({
-            data: update(this.state.data, { $autoArray: { [index]: { $auto: {isAlive: { $set: val.value} } }}})
-          });
+          else{
+            let newVal: IDeviceMessages = {name: val.name, isAlive: val.value, values: new Map<string, { topic: string, value: IMessageType }>()};
+            // this.setState({
+            //   data: update(this.state.data, { $add: [
+            //     [val.name, newVal]] })
+            // });
+            this.setState(prevState => ({
+              data: update(prevState.data, { $add: [
+                [val.name, newVal]] })
+            }));
+            // this.setState(prevState => ({
+            //   data:prevState.data.set(val.name, newVal)
+            // }));
+          }
         }
         else if(isChannelValue(val)){
-          if(index === -1){
+          let old_device = this.state.data.get(val.name);
+          if(old_device === undefined){
+            let newVal: IDeviceMessages = {name: val.name, isAlive: true, values: new Map([
+              [val.value.topic, val.value]
+            ])};
+
+            
+            this.setState({
+              data: update(this.state.data, { $add: [
+                [val.name, newVal]] })
+            });
+
             return;
           }
 
-          let valindex = this.state.data[index].values.findIndex(x => x.topic === val.value.topic);
-          if(valindex === -1){
-            return;
-          }
+          let new_device = update(old_device, {$merge: {isAlive: true}});
+          let old_channel = new_device.values.get(val.value.topic);          
+          if(old_channel === undefined){
+              let newData = update(new_device, {values: { $add: [[val.value.topic, val.value]] }});
 
-          this.setState({
-            data: update(this.state.data, { $autoArray: { [index]: { $auto: {values:{$autoArray: { [valindex]: {value: {$set: val.value.value} }}}}}}})
-          });
+              this.setState((prevState) => ({
+                data: update(prevState.data as any, { [val.name]: { $set: newData} })
+              }));
+          }
+          else{
+            if(old_device.isAlive === new_device.isAlive && old_channel.value === val.value.value){
+              return;
+            }
+            this.setState({
+              data: update(this.state.data, { [val.name]: { $set: 
+                update(new_device, { [val.value.topic]: { $set: 
+                update(old_channel, { $merge: {value: val.value.value}})} 
+              })} 
+              })
+            });
+          }
         }
-
-
       });
   }
 
