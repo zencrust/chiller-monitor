@@ -91,7 +91,7 @@ export default class MainLayout extends React.Component<any, IState> {
             {
               return;
             }
-            
+
             this.setState({
               data: update(this.state.data, { [val.name]: { $set: 
                 update(oldVal, {$merge:{isAlive: val.value}})} })
@@ -141,12 +141,10 @@ export default class MainLayout extends React.Component<any, IState> {
             if(old_device.isAlive === new_device.isAlive && old_channel.value === val.value.value){
               return;
             }
+            let channel_val = update(old_channel, { $merge: {value: val.value.value}});
+            let dev_val = update(new_device, {values: { [val.value.topic]: { $set: channel_val}}});
             this.setState({
-              data: update(this.state.data, { [val.name]: { $set: 
-                update(new_device, { [val.value.topic]: { $set: 
-                update(old_channel, { $merge: {value: val.value.value}})} 
-              })} 
-              })
+              data: update(this.state.data, { [val.name]: { $set: dev_val }}) 
             });
           }
         }
