@@ -6,19 +6,41 @@ export interface ServerStatus {
     color: "success" | "error" | "warning" | "info" | undefined;
 }
 
-export type IMessageType = number | boolean | "Disconnected";
+export type IMessageType = number | boolean | "Disconnected" | undefined;
 export type IDeviceData = Map<string, IMessageType>;
 export type IDeviceAllData = { data: Map<string, IDeviceData>, isAlive: boolean };
 export type IMessage = Map<string, IDeviceAllData>;
 export type IDeviceStatus = Record<string, boolean>;
 
+
+export interface limits_combined {
+    temperature: temperature_limits[];
+    dio: digital_limits[];
+}
+
+export type Ilimits = limits_combined | undefined;
+
+export interface temperature_limits{
+    name: string[];
+    lsl: number;
+    usl: number;
+}
+
+export interface digital_limits{
+    name: string[],
+    expected_value: boolean;
+}
+
 interface ISettings {
-    mqtt_server: string,
-    port: number,
-    user_name: string,
-    protocol: 'wss' | 'ws' | 'mqtt' | 'mqtts' | 'tcp' | 'ssl' | 'wx' | 'wxs',
-    password: string,
-    devices: string[]
+    mqtt_server: string;
+    port: number;
+    user_name: string;
+    protocol: 'wss' | 'ws' | 'mqtt' | 'mqtts' | 'tcp' | 'ssl' | 'wx' | 'wxs';
+    password: string;
+    devices: string[];
+    order:string[];
+    channel_limits: temperature_limits[];
+    digital_limits: digital_limits[];
 }
 export type IChannelType = {topic: string, value: IMessageType};
 export type IDeviceMessage = Map<string, IChannelType>;
@@ -34,20 +56,11 @@ export interface ISendDeviceValue<T>{
     value: T;
 }
 
-// function dictToArr(name: string, msg: IDeviceAllData) {
-//     let values = Object.keys(msg.data).flatMap(func =>
-//         Object.keys(msg.data[func]).map(
-//             function (topic) {
-//                 return { topic, value: msg.data[func][topic] };
-//             })
-//     );
-
-//     return { name, values, isAlive: msg.isAlive };
-// }
-
 export type setValuesType = IDeviceMessages | ISendDeviceValue<boolean> | ISendDeviceValue<IChannelType>;
 
-export default function MqttManager(setServerStatus: (val: ServerStatus) => void, setValues: (val: setValuesType) => void) {
+export default function MqttManager(setServerStatus: (val: ServerStatus) => void,
+ setValues: (val: setValuesType) => void,
+ setLimits: (val: Ilimits) => void) {
     let settings: Promise<ISettings> = fetch('assets/config/settings.json')
         .then(x => x.json())
         .catch(x => console.log(x));
@@ -76,27 +89,9 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
     let _registerChanges = (client: mqtt.MqttClient) => {
         console.log('_registerChanges');
         client.on('message', (topic, msg) => {
-            //console.log(topic);
-
             let [device, func, topic_id] = topic.split('/');
-
-            //console.log(func);
-            // let partUpdate = true;
-            // if (allDeviceData[device] === undefined) {
-            //     allDeviceData[device] = { data: {}, isAlive: false };
-            //     allDeviceData[device].data['dio'] = {};
-            //     allDeviceData[device].data['temp'] = {};
-            //     partUpdate = false;
-            // }
-
-            // let devdata = allDeviceData[device].data[func];
-            //console.log(topic);
             if (func === 'heartbeat') {
-                // allDeviceData[device].isAlive = false;
-                // if(partUpdate){
-                    setValues({name: device, value:false});
-                // }
-                //console.log(topic);
+                setValues({name: device, value:false});
             }
             else {
                 let finalval: IMessageType = 'Disconnected';
@@ -110,23 +105,9 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
                     if (!isNaN(numVal)) {
                         finalval = numVal;
                     }
-                    //else it should be disconnected
                 }
-                // partUpdate = partUpdate && devdata[topic_id] !== undefined;
-                // devdata[topic_id] = finalval;
-                // allDeviceData[device].isAlive = true;
-                
-                // if(partUpdate){
-                     setValues({name: device, value:{topic: topic_id, value: finalval}});
-                // }
-
-                // allDeviceData[device].isAlive = true;
-
+                setValues({name: device, value:{topic: topic_id, value: finalval}});
             }
-
-            //if(!partUpdate){
-            // setValues(dictToArr(device, allDeviceData[device]));
-            //}
         });
     }
 
@@ -168,11 +149,15 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             client.subscribe(`${device}/temp/#`);
             client.subscribe(`${device}/heartbeat`);
             setValues({name: device, value:false});
+            val.order.forEach(topic => {
+                setValues({name: device, value:{topic: topic, value: undefined}});
+            });
         });
 
        
         console.log('connection sub', val.mqtt_server);
-        setServerStatus({ message: 'Connecting ', color: "warning" })
+        setServerStatus({ message: 'Connecting ', color: "warning" });
+        setLimits({temperature: val.channel_limits, dio:val.digital_limits});
         _registerErrors(client);
         _registerChanges(client);
 

@@ -7,18 +7,19 @@ import Report from '../Report/index';
 import update, { extend } from 'immutability-helper'; // ES6
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IDeviceMessages, IDeviceMessage, IDeviceStatus, IMessageType, IChannelType, ISendDeviceValue, setValuesType } from '../../MqttManager';
+import MqttManager, { ServerStatus, IDeviceMessages, IDeviceMessage, IDeviceStatus, IMessageType, IChannelType, ISendDeviceValue, setValuesType, Ilimits } from '../../MqttManager';
 import { isBoolean, isString } from 'util';
 import { string } from 'prop-types';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 interface IState {
-  collapsed: boolean,
-  content: string,
-  data: Map<string, IDeviceMessages>,
-  status: ServerStatus,
+  collapsed: boolean;
+  content: string;
+  data: Map<string, IDeviceMessages>;
+  status: ServerStatus;
   deviceStatus: IDeviceStatus;
+  limits: Ilimits;
 }
 
 let logs = {
@@ -66,6 +67,7 @@ export default class MainLayout extends React.Component<any, IState> {
       content: "1",
       data: new Map(),
       deviceStatus: {},
+      limits: undefined,
       status: { color: "info", message: "Initializing" }
     };
   }
@@ -99,17 +101,10 @@ export default class MainLayout extends React.Component<any, IState> {
           }
           else{
             let newVal: IDeviceMessages = {name: val.name, isAlive: val.value, values: new Map<string, { topic: string, value: IMessageType }>()};
-            // this.setState({
-            //   data: update(this.state.data, { $add: [
-            //     [val.name, newVal]] })
-            // });
             this.setState(prevState => ({
               data: update(prevState.data, { $add: [
                 [val.name, newVal]] })
             }));
-            // this.setState(prevState => ({
-            //   data:prevState.data.set(val.name, newVal)
-            // }));
           }
         }
         else if(isChannelValue(val)){
@@ -148,6 +143,10 @@ export default class MainLayout extends React.Component<any, IState> {
             });
           }
         }
+      },
+      (limits: Ilimits) =>
+      {
+        this.setState({limits:limits});
       });
   }
 
@@ -191,7 +190,7 @@ export default class MainLayout extends React.Component<any, IState> {
             <div style={{ padding: 24, background: '#fff', minHeight: 360, marginTop: '20px' }}>
               {(() => {
                 switch (this.state.content) {
-                  case "1": return <AlarmList data={this.state.data} />;
+                  case "1": return <AlarmList data={this.state.data} limits={this.state.limits}/>;
                   case "2": return <Report logs={logs.log} />;
                   default: return <div>Unknown option selected</div>;
                 }

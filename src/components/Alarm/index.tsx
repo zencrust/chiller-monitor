@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, Alert, Statistic, Progress } from 'antd';
-import { IDeviceMessages, IMessageType, IChannelType } from '../../MqttManager';
-import { isBoolean, isNumber } from 'util';
+import { IDeviceMessages, IMessageType, IChannelType, Ilimits } from '../../MqttManager';
+import { isBoolean, isNumber, isUndefined } from 'util';
 import { array } from 'prop-types';
 
 let setDisconnect = (isAlive: boolean) => {
@@ -20,68 +20,64 @@ let setDisconnect = (isAlive: boolean) => {
 }
 
 
-const ResultTile = (props: { data: IChannelType }) => {
-    let value = props.data;
-    if (isBoolean(value.value)) {
-        let c: "success" | "exception" = value.value ? "success" : "exception";
+const ResultTile = (props: { data: IChannelType, limits:Ilimits }) => {
+    let channel_value = props.data;
+    if (isBoolean(channel_value.value)) {
+        let c : "success" | "exception"| "normal" = "normal";
+        if(!isUndefined(props.limits)){
+            let channel_limit = props.limits.dio.find((x) => x.name.indexOf(channel_value.topic) !== -1);
+            if(!isUndefined(channel_limit)){
+                c = channel_value.value === channel_limit.expected_value ? "success" : "exception";
+            }
+        }
         return (
             <Progress type="circle"
                 percent={100}
-                key={value.topic}
+                key={channel_value.topic}
                 status={c}
             />        
         );
     }
 
-    if (isNumber(value.value)) {
-        let c : "success" | "exception" = value.value < 26 ? "success" : "exception";
-        
+    if (isNumber(channel_value.value)) {
+        let c : "success" | "exception"| "normal" = "normal";
+        if(!isUndefined(props.limits)){
+            let channel_limit = props.limits.temperature.find((x) => x.name.indexOf(channel_value.topic) !== -1);
+            if(!isUndefined(channel_limit)){
+                c = (channel_value.value < channel_limit.usl) && (channel_value.value > channel_limit.lsl) ? "success" : "exception";
+            }
+        }        
         return (
             <Progress type="circle"
-                percent={value.value}
-                key={value.topic}
+                percent={channel_value.value}
+                key={channel_value.topic}
                 format={(p) => `${p} ℃`}
                 status={c}
             />
+        )
+    }
+    if(isUndefined(channel_value.value)){
+        return(
+            <div/>
         )
     }
 
     return (
         <Progress type="circle"
                     percent={100}
-                    key={value.topic}
-                    format={() => `${value.value}`} 
+                    key={channel_value.topic}
+                    format={() => `${channel_value.value}`} 
                     status="exception"
         />
     );
 }
 
-const DeviceTile = (props: {data: IDeviceMessages}) => {
+const DeviceTile = (props: {data: IDeviceMessages, limits:Ilimits}) => {
     let val = props.data;
     function deviceValues(device: IDeviceMessages): IChannelType[]{
         if(device.values.size > 0){
-            return Array.from(device.values.keys()).map(key => device.values.get(key) as IChannelType).sort(
-                (a, b) =>
-                {
-                    let a_bool = isBoolean(a.value);
-                    let b_bool = isBoolean(b.value);
-                    if((a_bool && b_bool))
-                    {
-                        return a.topic < b.topic ? -1 : 1;
-                    }
-                    if(a_bool){
-                        return -1;
-                    }
-
-                    if(b_bool){
-                        return 1;
-                    }
-                    
-                    return a.topic < b.topic ? -1 : 1;
-                }
-            );
+            return Array.from(device.values.keys()).map(key => device.values.get(key) as IChannelType);
         }
-
         return [];
     }
 
@@ -91,7 +87,7 @@ const DeviceTile = (props: {data: IDeviceMessages}) => {
             {deviceValues(props.data).map(itr => {
                 return (
                     <Card title={itr.topic} style={{ margin: '5px 5px' }} key={itr.topic}> 
-                        <ResultTile data={itr} />
+                        <ResultTile data={itr} limits={props.limits}/>
                     </Card>
                 );
             })}
@@ -100,7 +96,7 @@ const DeviceTile = (props: {data: IDeviceMessages}) => {
     </Card>);
 }
 
-const AlarmList = (props: { data: Map<string, IDeviceMessages> }) => {
+const AlarmList = (props: { data: Map<string, IDeviceMessages>, limits:Ilimits }) => {
     let arr = props.data;
     let deviceArray = Array.from(arr.keys()).map(key => arr.get(key) as IDeviceMessages);
 
@@ -109,7 +105,7 @@ const AlarmList = (props: { data: Map<string, IDeviceMessages> }) => {
             {deviceArray.map(item => {
                 return (
                     <div key={item.name}>
-                        <DeviceTile data={item}/>
+                        <DeviceTile data={item} limits={props.limits}/>
                     </div>
                 )
             })}
