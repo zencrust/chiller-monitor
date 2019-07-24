@@ -1,5 +1,4 @@
 import mqtt, { IClientOptions } from "mqtt"
-import { bool } from "prop-types";
 
 export interface ServerStatus {
     message: string;
@@ -56,7 +55,7 @@ export interface ISendDeviceValue<T>{
     value: T;
 }
 
-export type setValuesType = IDeviceMessages | ISendDeviceValue<boolean> | ISendDeviceValue<IChannelType>;
+export type setValuesType =  ISendDeviceValue<boolean> | ISendDeviceValue<IChannelType>;
 
 export default function MqttManager(setServerStatus: (val: ServerStatus) => void,
  setValues: (val: setValuesType) => void,
@@ -141,6 +140,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
         }];
         //console.log(val);
         let client = mqtt.connect(options);
+        setLimits({temperature: val.channel_limits, dio:val.digital_limits});
 
         // console.log("all dev", `${val.devices}`);
         val.devices.forEach(device => {
@@ -149,15 +149,11 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             client.subscribe(`${device}/temp/#`);
             client.subscribe(`${device}/heartbeat`);
             setValues({name: device, value:false});
-            val.order.forEach(topic => {
-                setValues({name: device, value:{topic: topic, value: undefined}});
-            });
         });
 
        
         console.log('connection sub', val.mqtt_server);
         setServerStatus({ message: 'Connecting ', color: "warning" });
-        setLimits({temperature: val.channel_limits, dio:val.digital_limits});
         _registerErrors(client);
         _registerChanges(client);
 

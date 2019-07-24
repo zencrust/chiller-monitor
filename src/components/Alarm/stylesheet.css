@@ -1,0 +1,87 @@
+.digitalStyle-exception {
+    margin: 5px 5px;
+    height: 10px;
+    min-width: 80px;
+    max-width: 385 px;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    width: 70%;
+    float: left;
+    background: #f5222d;
+}
+
+.digitalStyle-success {
+    margin: 5px 5px;
+    height: 10px;
+    min-width: 80px;
+    width: 70%;
+    max-width: 385 px;
+
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    float: left;
+    background: #04B404;
+}
+
+.digitalStyle-warning {
+    margin: 5px 5px;
+    height: 10px;
+    min-width: 80px;
+    width: 70%;
+    max-width: 385 px;
+
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+
+    float: left;
+    background: #D7DF01;
+}
+
+.digitalStyle-active {
+    margin: 5px 5px;
+    height: 10px;
+    min-width: 80px;
+    width: 70%;
+    max-width: 385 px;
+
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+
+    float: left;
+    background: #1890ff;
+}
+
+.digitalStyle-disabled {
+    margin: 5px 5px;
+    height: 10px;
+    min-width: 80px;
+    width: 70%;
+    max-width: 385 px;
+
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+
+    float: left;
+    background: #A4A4A4;
+}
+
+.digitalStyle-message {
+    min-width: 100px;
+    float: rignt;
+}
+
+.cardStyle {
+    background: #FAFAFA;
+    min-width: 250px;
+    margin: 5px;
+}
+
+.CardsColumn {
+    display: flex;
+    flex-wrap: wrap;   
+}
+
+.CardsColumn > div {
+    flex: 1;
+    margin: 10px;
+}

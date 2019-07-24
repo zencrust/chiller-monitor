@@ -5,7 +5,6 @@
     "user_name": "",
     "password": "",
     "devices":["Chiller1", "Chiller2", "Chiller3", "Chiller4"],
-    "order":["R Phase IN", "Y Phase IN", "B Phase IN", "Chiller Fault", "Chiller Healthy", "Tank 1", "Tank 2", "Tank 3", "Tank 4", "Motor 1", "Motor 2"],
     "channel_limits":[
         {
             "name":["Motor 1", "Motor 2"],
