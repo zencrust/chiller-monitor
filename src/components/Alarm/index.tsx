@@ -158,7 +158,9 @@ const DeviceTile = (props: {data: IComposedDeviceData, limits:Ilimits}) => {
     let val = props.data;
 
     return(
-    <Card title={val.name} className="cardStyle" extra={setDisconnect(val.isAlive, val.wifiSignalPercentage)}>
+    <Card title={val.name} className="cardStyle" extra={setDisconnect(val.isAlive, val.wifiSignalPercentage)}
+    style={{background:val.isAlive? "#fefefe": "#bfbfbf"}}
+    >
         <div>
             {/* <h3 style={{textAlign:'center'}}>Input Power Supply</h3> */}
             <Divider>Input Power Supply</Divider>
