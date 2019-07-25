@@ -131,6 +131,15 @@ export default class MainLayout extends React.Component<any, IState> {
   componentDidMount() {
     this.mqtt_sub = MqttManager((val: ServerStatus) => {
       this.setState({ status: val });
+      if(val.color !== "success"){
+        this.state.data.forEach((value) =>
+        {
+          this.setState({
+            data: update(this.state.data, { [value.name]: { $set: 
+              update(value, {$merge:{isAlive: false, values: CreateNewResultState(this.state.limits as limits_combined)}})} })
+          });
+        });
+      }
     },
       (val: setValuesType) => {
         if(isAliveMessage(val)){
@@ -285,8 +294,8 @@ export default class MainLayout extends React.Component<any, IState> {
             </div>
           </Header>
           <Content style={{ margin: '16px' }}>
-             <Alert message={this.state.status.message} type={this.state.status.color} showIcon style={{ textAlign: "left", fontSize: 15, textOverflow: 'ellipsis', textJustify: 'inter-word', textTransform: 'capitalize' }} />
-            <AlarmList data={deviceValues(this.state.data)} limits={this.state.limits}/>
+            <Alert message={this.state.status.message} type={this.state.status.color} showIcon style={{ textAlign: "left", fontSize: 15, textOverflow: 'ellipsis', textJustify: 'inter-word', textTransform: 'capitalize' }} />
+            <AlarmList data={deviceValues(this.state.data)} limits={this.state.limits} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>Chiller Monitor 2019. {}</Footer>
         </Layout>
