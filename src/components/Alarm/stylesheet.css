@@ -67,6 +67,7 @@
 }
 
 .DeviceConnectedStyle{
+    margin-top: 1px;
     color: #4EB94A;
     font-weight: bold;
     float: left;
