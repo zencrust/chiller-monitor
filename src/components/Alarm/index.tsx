@@ -175,9 +175,7 @@ const AlarmList = (props: { data: IComposedDeviceData[], limits:Ilimits }) => {
         <div className="CardsColumn">
             {arr.map(item => {
                 return (
-                <div>
                     <DeviceTile data={item} limits={props.limits} key={item.name}/>
-                </div>
                 )
             })}
         </div>

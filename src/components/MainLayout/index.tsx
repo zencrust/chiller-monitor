@@ -82,12 +82,12 @@ function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
       ChillerOk: false
     },
     tank_status:{
-      values: [Number.NaN, Number.NaN],
+      values: ["Disconnected", "Disconnected"],
       usl: lim.temperature[tank_index].usl,
       lsl: lim.temperature[tank_index].lsl
     },
     motor_status:{
-      values: [Number.NaN, Number.NaN, Number.NaN, Number.NaN],
+      values: ["Disconnected", "Disconnected", "Disconnected", "Disconnected"],
       usl: lim.temperature[motor_index].usl,
       lsl: lim.temperature[motor_index].lsl
     }
