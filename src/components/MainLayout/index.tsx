@@ -43,12 +43,14 @@ export type TemperatureType = number | "Disconnected";
 
 export interface ITankStatus {
   values: TemperatureType[];
+  retries: number[];
   usl: number;
   lsl: number;
 }
 
 export interface IMotorStatus{
   values: TemperatureType[];
+  retries: number[];
   usl: number;
   lsl: number;
 }
@@ -85,12 +87,14 @@ function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
     tank_status:{
       values: ["Disconnected", "Disconnected"],
       usl: lim.temperature[tank_index].usl,
-      lsl: lim.temperature[tank_index].lsl
+      lsl: lim.temperature[tank_index].lsl,
+      retries: [0, 0]
     },
     motor_status:{
       values: ["Disconnected", "Disconnected", "Disconnected", "Disconnected"],
       usl: lim.temperature[motor_index].usl,
-      lsl: lim.temperature[motor_index].lsl
+      lsl: lim.temperature[motor_index].lsl,
+      retries: [0, 0, 0, 0]
     }
   }
 }
@@ -167,17 +171,55 @@ export default class MainLayout extends React.Component<any, IState> {
                    
           let motor_index = motor_id.indexOf(val.value.topic);
           if(motor_index !== -1){
-            if(isNumber (val.value.value) || val.value.value === "Disconnected") {              
-              let dev_val = update(new_device, { values: { motor_status: { values: {[motor_index] : { $set:val.value.value }}}}});
+            if(isNumber (val.value.value)) {              
+              let dev_val = update(new_device, { values: { motor_status: { 
+                values: {[motor_index] : { $set:val.value.value }},
+                retries: {[motor_index] : { $set:0 }}
+              }}});
+
               this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+            }
+            else if(val.value.value === "Disconnected"){
+              let updated_disconnect = new_device.values.motor_status.retries[motor_index] +1;
+              if(updated_disconnect > 3){
+                let dev_val = update(new_device, { values: { motor_status: { 
+                  values: {[motor_index] : { $set:val.value.value }},
+                  retries: {[motor_index] : { $set:0 }}
+                }}});
+
+                this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+              }
+              else{
+                let dev_val = update(new_device, { values: { motor_status: { retries: {[motor_index] : { $set: updated_disconnect}}}}});
+                this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+              }
             }
           }
           else{
             let tank_index = tank_id.indexOf(val.value.topic);
             if(tank_index !== -1){
-              if(isNumber (val.value.value) || val.value.value === "Disconnected") {              
-                let dev_val = update(new_device, { values: { tank_status: { values: {[tank_index] : { $set:val.value.value }}}}});
+              if(isNumber (val.value.value)) {              
+                let dev_val = update(new_device, { values: { tank_status: 
+                  { values: {[tank_index] : { $set:val.value.value }},
+                    retries: {[tank_index] : { $set: 0}} }
+                }});
+
                 this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+              }
+              else if(val.value.value === "Disconnected"){
+                let updated_disconnect = new_device.values.tank_status.retries[tank_index] +1;
+                if(updated_disconnect > 3){
+                  let dev_val = update(new_device, { values: { tank_status: 
+                    { values: {[tank_index] : { $set:val.value.value }},
+                      retries: {[tank_index] : { $set: 0}}
+                  }}});
+
+                  this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+                }
+                else{
+                  let dev_val = update(new_device, { values: { tank_status: { retries: {[tank_index] : { $set: updated_disconnect}}}}});
+                  this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+                }
               }
             }
             else{
