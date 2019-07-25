@@ -11,7 +11,7 @@ function calculateWifiColor(v: number){
     }
 
     if(v > 35){
-        return "D7DF01";
+        return "#D7DF01";
     }
 
     return "#f5222d";
