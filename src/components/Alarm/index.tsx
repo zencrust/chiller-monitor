@@ -4,7 +4,6 @@ import { Ilimits } from '../../MqttManager';
 import { isNumber } from 'util';
 import { IComposedDeviceData, IChillerStatus, TemperatureType } from '../MainLayout';
 import './stylesheet.css';
-import { number } from 'prop-types';
 
 function calculateWifiColor(v: number){
     if(v > 70){
