@@ -65,18 +65,3 @@
     white-space: nowrap;
     margin:10px 5px
 }
-
-.DeviceConnectedStyle{
-    margin-top: 1px;
-    color: #4EB94A;
-    font-weight: bold;
-    float: left;
-    margin-right: 3px;
-    font-size:18;
-}
-
-.DeviceDisconnectedStyle{
-    color: #ff7f50;
-    font-weight: bold;
-    font-size:18 ;
-}

@@ -4,38 +4,35 @@ import { Ilimits } from '../../MqttManager';
 import { isNumber } from 'util';
 import { IComposedDeviceData, IChillerStatus, TemperatureType } from '../MainLayout';
 import './stylesheet.css';
+import { WiFiSignalIndicator, WifiIndicator } from '../WifiIndicator';
 
-function calculateWifiColor(v: number){
-    if(v > 70){
-        return "#04B404";
+
+function calculateWifiSignal(isAlive: boolean, v: number): WiFiSignalIndicator{
+    if(!isAlive){
+        return "DISCONNECTED";
+    }
+    if(v > 80) {
+        return "EXCELLENT";
     }
 
-    if(v > 35){
-        return "#D7DF01";
+    if(v > 65) {
+        return "GREAT";
     }
 
-    return "#f5222d";
+    if(v > 40) {
+        return "OKAY";
+    }
 
+    if(v > 25){
+        return "WEAK";
+    }
+
+    return "UNUSABLE";
 }
 
 let setDisconnect = (isAlive: boolean, signal:number) => {
-    if (isAlive) {
-        return (
-            <div>
-                <div className="DeviceConnectedStyle">
-                    Connected
-                </div>
-                <Tooltip placement="top" style={{float:"left"}} title="WiFi Signal Strength On the Device"> 
-                    <Badge count={signal} style={{ backgroundColor:calculateWifiColor(signal)}}/>
-                </Tooltip>
-            </div>
-        );
-    }
-
     return (
-        <div className="DeviceDisconnectedStyle">
-            Disconnected
-        </div>
+        <WifiIndicator strength={calculateWifiSignal(isAlive, signal)} /> 
     );
 }
 
