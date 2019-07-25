@@ -149,11 +149,18 @@ export default class MainLayout extends React.Component<any, IState> {
             {
               return;
             }
-
-            this.setState({
-              data: update(this.state.data, { [val.name]: { $set: 
-                update(oldVal, {$merge:{isAlive: val.value}})} })
-            });
+            if(!val.value){
+              this.setState({
+                data: update(this.state.data, { [oldVal.name]: { $set: 
+                  update(oldVal, {$merge:{isAlive: false, values: CreateNewResultState(this.state.limits as limits_combined)}})} })
+              });
+            }
+            else{
+              this.setState({
+                data: update(this.state.data, { [val.name]: { $set: 
+                  update(oldVal, {$merge:{isAlive: val.value}})} })
+              });
+            }
           }
           else{
             let newVal: IComposedDeviceData = {name: val.name, isAlive: val.value, wifiSignalPercentage:0, values: CreateNewResultState(this.state.limits as limits_combined) };
