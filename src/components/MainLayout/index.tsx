@@ -64,6 +64,7 @@ export interface IComposedDeviceData {
   name: string;
   values: IComposedResultsData;
   isAlive: boolean;
+  wifiSignalPercentage: number;
 }
 
 function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
@@ -142,7 +143,7 @@ export default class MainLayout extends React.Component<any, IState> {
             });
           }
           else{
-            let newVal: IComposedDeviceData = {name: val.name, isAlive: val.value, values: CreateNewResultState(this.state.limits as limits_combined) };
+            let newVal: IComposedDeviceData = {name: val.name, isAlive: val.value, wifiSignalPercentage:0, values: CreateNewResultState(this.state.limits as limits_combined) };
             this.setState(prevState => ({
               data: update(prevState.data, { $add: [
                 [val.name, newVal]] })
@@ -154,8 +155,16 @@ export default class MainLayout extends React.Component<any, IState> {
           if(old_device === undefined){
             return;
           };
-                   
           let new_device = old_device.isAlive === false ? update(old_device, {$merge: {isAlive: true}}): old_device;
+
+          if(val.value.topic === "wifi Signal Strength"){
+            if(isNumber(val.value.value)){
+              let dev_val = update(new_device, { wifiSignalPercentage: { $set:val.value.value }});
+              this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});  
+            }
+            return
+          }
+                   
           let motor_index = motor_id.indexOf(val.value.topic);
           if(motor_index !== -1){
             if(isNumber (val.value.value) || val.value.value === "Disconnected") {              

@@ -92,6 +92,10 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             if (func === 'heartbeat') {
                 setValues({name: device, value:false});
             }
+            else if(topic_id === 'wifi Signal Strength'){
+                let finalval = parseInt(msg.toString());
+                setValues({name: device, value:{topic: topic_id, value: finalval}});
+            }
             else {
                 let finalval: IMessageType = 'Disconnected';
                 let strVal = msg.toString();
@@ -148,6 +152,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             client.subscribe(`${device}/dio/#`);
             client.subscribe(`${device}/temp/#`);
             client.subscribe(`${device}/heartbeat`);
+            client.subscribe(`${device}/telemetry/wifi Signal Strength`);
             setValues({name: device, value:false});
         });
 
