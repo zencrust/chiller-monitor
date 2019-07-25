@@ -94,8 +94,8 @@ function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
   }
 }
 
-let motor_id = ["Tank 1", "Tank 2", "Tank 3", "Tank 4"];
-let tank_id = ["Motor 1", "Motor 2"];
+let motor_id = ["Tank 1", "Tank 2", "Tank 3", "Motor 1"];
+let tank_id = ["Tank 4", "Motor 2"];
 
 
 function deviceValues(device: Map<string, IComposedDeviceData>): IComposedDeviceData[]{
