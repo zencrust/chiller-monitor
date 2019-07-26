@@ -179,14 +179,14 @@ const DeviceTile = (props: {data: IComposedDeviceData, limits:Ilimits}) => {
                 usl={val.values.tank_status.usl}
                 lsl={val.values.tank_status.lsl}
                 />
-            <Divider>Motor 1</Divider>
+            <Divider>Facility Pump</Divider>
             <TemperatureCard 
                 temp1 = {val.values.motor_status.values[0]}
                 temp2 = {val.values.motor_status.values[1]} 
                 usl={val.values.motor_status.usl}
                 lsl={val.values.motor_status.lsl}                
             />
-            <Divider>Motor 2</Divider>
+            <Divider>Compressor Pump</Divider>
             <TemperatureCard 
                 temp1 = {val.values.motor_status.values[2]}
                 temp2 = {val.values.motor_status.values[3]} 
