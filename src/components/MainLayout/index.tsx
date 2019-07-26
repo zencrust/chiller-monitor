@@ -99,9 +99,12 @@ function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
   }
 }
 
-let motor_id = ["Tank 1", "Tank 2", "Tank 3", "Motor 1"];
-let tank_id = ["Tank 4", "Motor 2"];
+// let motor_id = ["Tank 1", "Tank 2", "Tank 3", "Motor 1"];
+// let tank_id = ["Tank 4", "Motor 2"];
 
+// Pins T1:4: J7, T2:13: J8, M1:25: J9, M2:26:J10, M3:27:J11, M4:32:J12
+let tank_id = ["Tank 1", "Tank 2"];
+let motor_id = ["Motor 1", "Motor 2", "Motor 3", "Motor 4"];
 
 function deviceValues(device: Map<string, IComposedDeviceData>): IComposedDeviceData[]{
   if(device.size > 0){

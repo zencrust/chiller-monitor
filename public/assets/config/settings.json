@@ -7,12 +7,12 @@
     "devices":["Chiller1", "Chiller2", "Chiller3", "Chiller4"],
     "channel_limits":[
         {
-            "name":["Motor 1", "Motor 2"],
+            "name":["Motor 1", "Motor 2", "Motor 3", "Motor 4"],
             "usl": 60,
             "lsl": 2
         },
         {
-            "name":["Tank 1", "Tank 2", "Tank 3", "Tank 4"],
+            "name":["Tank 1", "Tank 2"],
             "usl": 15,
             "lsl": 2
         }
