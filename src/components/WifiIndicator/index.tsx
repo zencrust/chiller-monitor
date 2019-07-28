@@ -18,8 +18,7 @@ export function WifiIndicator(props: {strength: WiFiSignalIndicator}){
             'DISCONNECTED': DISCONNECTED
         };
     return (
-        <img src={imageMap[props.strength]} style={{height:'2em'}}>
-
+        <img src={imageMap[props.strength]} style={{height:'2em'}} alt={props.strength}>
         </img>
     )
 }
