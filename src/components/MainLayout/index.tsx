@@ -177,7 +177,7 @@ export default class MainLayout extends React.Component<any, IState> {
           let old_device = this.state.data.get(val.name);
           if(old_device === undefined){
             return;
-          };
+          }
           let new_device = old_device.isAlive === false ? update(old_device, {$merge: {isAlive: true}}): old_device;
 
           if(val.value.topic === "wifi Signal Strength"){
