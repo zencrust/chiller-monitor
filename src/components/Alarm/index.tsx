@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { ReactElement } from 'react'
 import { Card, Progress, Divider, Badge, Tooltip } from 'antd';
 import { Ilimits } from '../../MqttManager';
 import { isNumber } from 'util';
 import { IComposedDeviceData, IChillerStatus, TemperatureType } from '../MainLayout';
 import './stylesheet.css';
 import { WiFiSignalIndicator, WifiIndicator } from '../WifiIndicator';
+import { number } from 'prop-types';
 
 
 function calculateWifiSignal(isAlive: boolean, v: number): WiFiSignalIndicator{
@@ -57,7 +58,7 @@ function ChillerStatus(props: {data: IChillerStatus}){
 
 function TemperatureGauge(props: {topic: string, value: TemperatureType, usl: number, lsl: number}){
 
-    function IsDisconnected(x: TemperatureType){
+    function calculatePercetage(x: TemperatureType){
         if(!isNumber(x)){
             return 100;
         }
@@ -65,13 +66,14 @@ function TemperatureGauge(props: {topic: string, value: TemperatureType, usl: nu
         return x;
     }
 
-    let c : "success" | "exception"| "normal" = "normal";
-    c = (props.value < props.usl) && (props.value > props.lsl) ? "success" : "exception";
-    let p = IsDisconnected(props.value);
+    let c : "success" | "exception"| "normal" = 
+    (props.value < props.usl) && (props.value > props.lsl) ? "success" : "exception";
+    let p = calculatePercetage(props.value);
+    let p_c = p * (100 / (props.usl + 10))
     let msg = p === 0 || isNaN(p)? "" : `${p} ℃`;
     return (
         <Progress type="line"
-            percent={p}
+            percent={p_c}
             format={() => `${msg}`}
             status={c}
         />
@@ -154,7 +156,7 @@ function PhaseTile(props: {type: "R"| "Y"| "B", value: boolean}){
 
 }
 
-const DeviceTile = (props: {data: IComposedDeviceData, limits:Ilimits}) => {
+const DeviceTile = (props: {data: IComposedDeviceData, limits:Ilimits}):ReactElement<any> => {
     let val = props.data;
 
     return(
@@ -179,14 +181,18 @@ const DeviceTile = (props: {data: IComposedDeviceData, limits:Ilimits}) => {
                 usl={val.values.tank_status.usl}
                 lsl={val.values.tank_status.lsl}
                 />
-            <Divider>Facility Pump</Divider>
+            <Tooltip placement="top" style={{float:"left"}} title="Facility Pump Temperature in Celcius"> 
+                <Divider>Facility Pump</Divider>
+            </Tooltip>
             <TemperatureCard 
                 temp1 = {val.values.motor_status.values[0]}
                 temp2 = {val.values.motor_status.values[1]} 
                 usl={val.values.motor_status.usl}
                 lsl={val.values.motor_status.lsl}                
             />
-            <Divider>Compressor Pump</Divider>
+            <Tooltip placement="top" style={{float:"left"}} title="Compressor Pump Temperature in Celcius"> 
+                <Divider>Compressor Pump</Divider>
+            </Tooltip>
             <TemperatureCard 
                 temp1 = {val.values.motor_status.values[2]}
                 temp2 = {val.values.motor_status.values[3]} 
