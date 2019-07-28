@@ -35,11 +35,11 @@ steps:
     TargetPath: .
 
 - script: |
-  docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) -t $(dockerId)/$(imageName):latest .
-  docker login -u $(dockerId) -p $(dockerPassword)
-  docker push $(dockerId)/$(imageName):$(Build.BuildNumber)
-  docker push $(dockerId)/$(imageName):latest
-displayName: 'Docker build and push'
+    docker build -t $(dockerId)/$(imageName):$(Build.BuildNumber) -t $(dockerId)/$(imageName):latest .
+    docker login -u $(dockerId) -p $(dockerPassword)
+    docker push $(dockerId)/$(imageName):$(Build.BuildNumber)
+    docker push $(dockerId)/$(imageName):latest
+  displayName: 'Docker build and push'
 
 - task: CopyFilesOverSSH@0
   inputs:
