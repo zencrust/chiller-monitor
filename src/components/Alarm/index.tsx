@@ -180,7 +180,6 @@ const DeviceTile: FunctionComponent<{ data: IComposedDeviceData }> = ({ data }) 
     const title = <TitleCard name={data.name} epochTime={data.epochTime} />
     return (
         <Card className="cardStyle" extra={setDisconnect(data.isAlive, data.wifiSignalPercentage)}
-            hoverable={true} size="small"
             title={title}
             style={{ background: data.isAlive ? "#fefefe" : "#bfbfbf" }}
         >
