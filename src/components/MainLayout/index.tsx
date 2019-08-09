@@ -6,19 +6,11 @@ import AlarmList from '../Alarm/index';
 import update from 'immutability-helper'; // ES6
 
 import { SelectParam } from 'antd/lib/menu';
-import MqttManager, { ServerStatus, IDeviceStatus, IChannelType, ISendDeviceValue, setValuesType, Ilimits, limits_combined } from '../../MqttManager';
-import { isBoolean, isString, isNumber } from 'util';
+import MqttManager, { ServerStatus, IDeviceStatus, IChannelType, ISendDeviceValue, setValuesType, Ilimits, limits_combined, MqttUnsubscribeType } from '../../MqttManager';
+import { isBoolean, isString, isNumber, isUndefined } from 'util';
 
 const { Header, Content, Footer } = Layout;
 
-interface IState {
-  collapsed: boolean;
-  content: string;
-  data: Map<string, IComposedDeviceData>;
-  status: ServerStatus;
-  deviceStatus: IDeviceStatus;
-  limits: Ilimits;
-}
 
 function isAliveMessage(x: any): x is ISendDeviceValue<boolean> {
   return isBoolean((x as ISendDeviceValue<boolean>).value);
@@ -67,6 +59,7 @@ export interface IComposedDeviceData {
   values: IComposedResultsData;
   isAlive: boolean;
   wifiSignalPercentage: number;
+  epochTime?: number;
 }
 
 function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
@@ -106,16 +99,21 @@ function CreateNewResultState(lim: limits_combined) : IComposedResultsData{
 let tank_id = ["Tank 1", "Tank 2"];
 let motor_id = ["Motor 1", "Motor 2", "Motor 3", "Motor 4"];
 
-function deviceValues(device: Map<string, IComposedDeviceData>): IComposedDeviceData[]{
-  if(device.size > 0){
-      return Array.from(device.keys()).map(key => device.get(key) as IComposedDeviceData);
-  }
-  return [];
+function deviceValues(device: Map<string, IComposedDeviceData>){
+  return Array.from(device.values());
+}
+
+interface IState {
+  collapsed: boolean;
+  content: string;
+  data: Map<string, IComposedDeviceData>;
+  status: ServerStatus;
+  deviceStatus: IDeviceStatus;
+  limits: Ilimits;
 }
 
 export default class MainLayout extends React.Component<any, IState> {
-  mqtt_sub: any;
-  timerID: any;
+  mqtt_sub: MqttUnsubscribeType;
   /**
    *
    */
@@ -166,7 +164,7 @@ export default class MainLayout extends React.Component<any, IState> {
             }
           }
           else{
-            let newVal: IComposedDeviceData = {name: val.name, isAlive: val.value, wifiSignalPercentage:0, values: CreateNewResultState(this.state.limits as limits_combined) };
+            let newVal: IComposedDeviceData = {name: val.name, isAlive: val.value, wifiSignalPercentage:0, epochTime: undefined, values: CreateNewResultState(this.state.limits as limits_combined) };
             this.setState(prevState => ({
               data: update(prevState.data, { $add: [
                 [val.name, newVal]] })
@@ -183,6 +181,14 @@ export default class MainLayout extends React.Component<any, IState> {
           if(val.value.topic === "wifi Signal Strength"){
             if(isNumber(val.value.value)){
               let dev_val = update(new_device, { wifiSignalPercentage: { $set:val.value.value }});
+              this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});  
+            }
+            return
+          }
+          else if(val.value.topic === "last update time"){
+            if(isNumber(val.value.value)){
+              //dont update isAlive here
+              let dev_val = update(old_device, { epochTime: { $set:val.value.value }});
               this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});  
             }
             return
@@ -283,7 +289,9 @@ export default class MainLayout extends React.Component<any, IState> {
   }
 
   componentWillUnmount() {
-    this.mqtt_sub();
+    if(!isUndefined(this.mqtt_sub)){
+      this.mqtt_sub();
+    }
   }
 
   onCollapse = (collapsed: boolean) => {
@@ -305,7 +313,7 @@ export default class MainLayout extends React.Component<any, IState> {
           </Header>
           <Content style={{ margin: '16px' }}>
             <Alert message={this.state.status.message} type={this.state.status.color} showIcon style={{ textAlign: "left", fontSize: 15, textOverflow: 'ellipsis', textJustify: 'inter-word', textTransform: 'capitalize' }} />
-            <AlarmList data={deviceValues(this.state.data)} limits={this.state.limits} />
+            <AlarmList data={deviceValues(this.state.data)} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>Chiller Monitor 2019. {}</Footer>
         </Layout>

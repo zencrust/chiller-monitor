@@ -56,7 +56,7 @@ export interface ISendDeviceValue<T>{
 }
 
 export type setValuesType =  ISendDeviceValue<boolean> | ISendDeviceValue<IChannelType>;
-
+export type MqttUnsubscribeType = undefined | (() => void);
 export default function MqttManager(setServerStatus: (val: ServerStatus) => void,
  setValues: (val: setValuesType) => void,
  setLimits: (val: Ilimits) => void) {
@@ -73,12 +73,6 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
         clean: true,
         reconnectPeriod: 1000,
         connectTimeout: 5000,
-        will: {
-            topic: 'WillMsg',
-            payload: 'Connection Closed abnormally..!',
-            qos: 0,
-            retain: false
-        },
         rejectUnauthorized: false
     }
 
@@ -92,7 +86,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             if (func === 'heartbeat') {
                 setValues({name: device, value:false});
             }
-            else if(topic_id === 'wifi Signal Strength'){
+            else if(topic_id === 'wifi Signal Strength' || topic_id === 'last update time'){
                 let finalval = parseInt(msg.toString());
                 setValues({name: device, value:{topic: topic_id, value: finalval}});
             }
@@ -101,7 +95,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
                 let strVal = msg.toString();
 
                 if (func === 'dio') {
-                    finalval = strVal === '1' ? true : false;
+                    finalval = strVal === '1';
                 }
                 else if (func === 'temp') {
                     let numVal = parseFloat(strVal);
@@ -131,7 +125,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
         });
     }
 
-    let unmount: any = null;
+    let unmount: MqttUnsubscribeType = undefined;
     settings.then(val => {
         //console.log(val.mqtt_server, options);
         options.username = val.user_name;
@@ -152,7 +146,7 @@ export default function MqttManager(setServerStatus: (val: ServerStatus) => void
             client.subscribe(`${device}/dio/#`);
             client.subscribe(`${device}/temp/#`);
             client.subscribe(`${device}/heartbeat`);
-            client.subscribe(`${device}/telemetry/wifi Signal Strength`);
+            client.subscribe(`${device}/telemetry/#`);
             setValues({name: device, value:false});
         });
 
