@@ -4,8 +4,6 @@ import { isNumber, isUndefined } from 'util';
 import { IComposedDeviceData, IChillerStatus, TemperatureType } from '../MainLayout';
 import './stylesheet.css';
 import { WiFiSignalIndicator, WifiIndicator } from '../WifiIndicator';
-import { number } from 'prop-types';
-
 
 function calculateWifiSignal(isAlive: boolean, v: number): WiFiSignalIndicator {
     if (!isAlive) {
