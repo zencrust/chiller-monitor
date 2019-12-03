@@ -232,25 +232,25 @@ export default class MainLayout extends React.Component<any, IState> {
                 this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
               }
               else if(val.value.value === "Disconnected"){
-                let updated_disconnect = new_device.values.tank_status.retries[tank_index] +1;
-                if(updated_disconnect > 3){
+                // let updated_disconnect = new_device.values.tank_status.retries[tank_index] +1;
+                // if(updated_disconnect > 3){
                   let tmp = this.state.data.get(val.name);
                   if(tmp !== undefined){
                     let cal_index = tank_index === 0? 1: 0;
                     val.value.value = tmp.values.tank_status.values[cal_index];
                   }
-                  
+
                   let dev_val = update(new_device, { values: { tank_status: 
                     { values: {[tank_index] : { $set:val.value.value }},
                       retries: {[tank_index] : { $set: 0}}
                   }}});
 
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
-                }
-                else{
-                  let dev_val = update(new_device, { values: { tank_status: { retries: {[tank_index] : { $set: updated_disconnect}}}}});
-                  this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
-                }
+                // }
+                // else{
+                  // let dev_val = update(new_device, { values: { tank_status: { retries: {[tank_index] : { $set: updated_disconnect}}}}});
+                  // this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
+                // }
               }
             }
             else{
