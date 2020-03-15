@@ -4,18 +4,18 @@
   "private": true,
   "homepage": "https://chiller.zencrust.cf",
   "dependencies": {
-    "@types/jest": "25.1.1",
-    "@types/node": "13.5.3",
-    "@types/react": "16.9.19",
+    "@types/jest": "25.1.4",
+    "@types/node": "13.9.1",
+    "@types/react": "16.9.23",
     "@types/react-dom": "16.9.5",
-    "antd": "3.26.7",
+    "antd": "4.0.2",
     "axios": "0.19.2",
     "immutability-helper": "3.0.1",
     "mqtt": "3.0.0",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
-    "react-scripts": "3.3.1",
-    "typescript": "3.7.5"
+    "react": "16.13.0",
+    "react-dom": "16.13.0",
+    "react-scripts": "3.4.0",
+    "typescript": "3.8.3"
   },
   "scripts": {
     "start": "react-scripts start",
