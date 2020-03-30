@@ -10,7 +10,7 @@
     "@types/react-dom": "16.9.5",
     "antd": "4.0.2",
     "axios": "0.19.2",
-    "immutability-helper": "3.0.1",
+    "immutability-helper": "3.0.2",
     "mqtt": "3.0.0",
     "react": "16.13.0",
     "react-dom": "16.13.0",
