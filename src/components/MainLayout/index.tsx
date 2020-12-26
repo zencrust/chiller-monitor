@@ -5,19 +5,16 @@ import { Layout, Alert } from 'antd';
 import AlarmList from '../Alarm/index';
 import update from 'immutability-helper'; // ES6
 
-import { SelectParam } from 'antd/lib/menu';
 import MqttManager, { ServerStatus, IDeviceStatus, IChannelType, ISendDeviceValue, setValuesType, Ilimits, limits_combined, MqttUnsubscribeType } from '../../MqttManager';
-import { isBoolean, isString, isNumber, isUndefined } from 'util';
-
 const { Header, Content, Footer } = Layout;
 
 
 function isAliveMessage(x: any): x is ISendDeviceValue<boolean> {
-  return isBoolean((x as ISendDeviceValue<boolean>).value);
+  return typeof((x as ISendDeviceValue<boolean>).value) === 'boolean';
 }
 
 function isChannelValue(x: any): x is ISendDeviceValue<IChannelType> {
-  return isString((x as ISendDeviceValue<IChannelType>).value.topic);
+  return typeof((x as ISendDeviceValue<IChannelType>).value.topic) === 'string';
 }
 
 export interface IPhaseData{
@@ -179,14 +176,14 @@ export default class MainLayout extends React.Component<any, IState> {
           let new_device = old_device.isAlive === false ? update(old_device, {$merge: {isAlive: true}}): old_device;
 
           if(val.value.topic === "wifi Signal Strength"){
-            if(isNumber(val.value.value)){
+            if((typeof(val.value.value) === 'number')){
               let dev_val = update(new_device, { wifiSignalPercentage: { $set:val.value.value }});
               this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});  
             }
             return
           }
           else if(val.value.topic === "last update time"){
-            if(isNumber(val.value.value)){
+            if((typeof(val.value.value) === 'number')){
               //dont update isAlive here
               let dev_val = update(old_device, { epochTime: { $set:val.value.value }});
               this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});  
@@ -196,7 +193,7 @@ export default class MainLayout extends React.Component<any, IState> {
                    
           let motor_index = motor_id.indexOf(val.value.topic);
           if(motor_index !== -1){
-            if(isNumber (val.value.value)) {              
+            if((typeof(val.value.value) === 'number')) {              
               let dev_val = update(new_device, { values: { motor_status: { 
                 values: {[motor_index] : { $set:val.value.value }},
                 retries: {[motor_index] : { $set:0 }}
@@ -223,7 +220,7 @@ export default class MainLayout extends React.Component<any, IState> {
           else{
             let tank_index = tank_id.indexOf(val.value.topic);
             if(tank_index !== -1){
-              if(isNumber (val.value.value)) {              
+              if((typeof(val.value.value) === 'number')) {              
                 let dev_val = update(new_device, { values: { tank_status: 
                   { values: {[tank_index] : { $set:val.value.value }},
                     retries: {[tank_index] : { $set: 0}} }
@@ -255,32 +252,32 @@ export default class MainLayout extends React.Component<any, IState> {
             }
             else{
               if(val.value.topic === "R Phase IN"){
-                if(isBoolean (val.value.value)) {              
+                if(typeof(val.value.value) === 'boolean') {              
                   let dev_val = update(new_device, { values: { phase: { R_Phase: {$set:val.value.value }}}});
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
                 }              
               }
               else if(val.value.topic === "Y Phase IN"){
-                if(isBoolean (val.value.value)) {   
+                if(typeof(val.value.value) === 'boolean') {   
                   val.value.value = true;           
                   let dev_val = update(new_device, { values: { phase: { Y_Phase: {$set:val.value.value }}}});
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
                 }  
               }
               else if(val.value.topic === "B Phase IN"){
-                if(isBoolean (val.value.value)) {              
+                if(typeof(val.value.value) === 'boolean') {              
                   let dev_val = update(new_device, { values: { phase: { B_Phase: {$set:val.value.value }}}});
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
                 }  
               }
               else if(val.value.topic === "Chiller Fault"){
-                if(isBoolean (val.value.value)) {              
+                if(typeof (val.value.value) === 'boolean') {              
                   let dev_val = update(new_device, { values: { chiller_status: { ChillerFault: {$set:val.value.value }}}});
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
                 }  
               }
               else if(val.value.topic === "Chiller Healthy"){
-                if(isBoolean (val.value.value)) {              
+                if(typeof (val.value.value) === 'boolean') {              
                   let dev_val = update(new_device, { values: { chiller_status: { ChillerOk: {$set:val.value.value }}}});
                   this.setState({data: update(this.state.data, { [val.name]: { $set: dev_val }})});
                 }  
@@ -296,7 +293,7 @@ export default class MainLayout extends React.Component<any, IState> {
   }
 
   componentWillUnmount() {
-    if(!isUndefined(this.mqtt_sub)){
+    if(!(this.mqtt_sub === undefined)){
       this.mqtt_sub();
     }
   }
@@ -305,7 +302,7 @@ export default class MainLayout extends React.Component<any, IState> {
     this.setState({ collapsed });
   };
 
-  onSelect = (param: SelectParam) => {
+  onSelect = (param: any) => {
     this.setState({ content: param.key });
   };
 

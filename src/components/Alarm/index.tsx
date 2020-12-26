@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from 'react'
 import { Card, Progress, Divider, Tooltip } from 'antd';
-import { isNumber, isUndefined } from 'util';
 import { IComposedDeviceData, IChillerStatus, TemperatureType } from '../MainLayout';
 import './stylesheet.css';
 import { WiFiSignalIndicator, WifiIndicator } from '../WifiIndicator';
@@ -65,7 +64,7 @@ const TemperatureGauge: FunctionComponent<{ topic: string, value: TemperatureTyp
  ({value, usl, lsl}) => {
 
     function calculatePercetage(x: TemperatureType) {
-        if (!isNumber(x)) {
+        if (!(typeof(x) === 'number')) {
             return 100;
         }
 
@@ -87,7 +86,7 @@ const TemperatureGauge: FunctionComponent<{ topic: string, value: TemperatureTyp
 }
 
 function calculateTemeratureColor(temp: TemperatureType, usl: number, lsl: number) {
-    if (!isNumber(temp)) {
+    if (!(typeof(temp) === 'number')) {
         return "#848484"
     }
 
@@ -124,15 +123,15 @@ function roundtoOneDecimal(a: number) {
 }
 
 function average(a: number | "Disconnected", b: number | "Disconnected") {
-    if (isNumber(a) && isNumber(b)) {
+    if ((typeof(a) === 'number') && (typeof(b) === 'number')) {
         return roundtoOneDecimal((a + b) / 2);
     }
 
-    if (isNumber(a)) {
+    if ((typeof(a)=== 'number')) {
         return roundtoOneDecimal(a);
     }
 
-    if (isNumber(b)) {
+    if ((typeof(b) === 'number')) {
         return roundtoOneDecimal(b);
     }
 
@@ -164,7 +163,7 @@ const PhaseTile: FunctionComponent<{ type: PhaseType, value: boolean }> = ({type
 
 }
 const TitleCard: FunctionComponent<{name: string, epochTime: number | undefined}> = ({name, epochTime})=> {
-    if(isUndefined(epochTime)){
+    if(epochTime === undefined){
         return(<>{name}</>);
     }
 
