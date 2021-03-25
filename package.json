@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://chiller.zencrust.cf",
   "dependencies": {
-    "@types/jest": "26.0.19",
+    "@types/jest": "26.0.22",
     "@types/node": "14.14.16",
     "@types/react": "17.0.0",
     "@types/react-dom": "17.0.0",
