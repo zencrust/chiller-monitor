@@ -5,7 +5,7 @@
   "homepage": "https://chiller.zencrust.cf",
   "dependencies": {
     "@types/jest": "26.0.19",
-    "@types/node": "14.14.16",
+    "@types/node": "15.6.1",
     "@types/react": "17.0.0",
     "@types/react-dom": "17.0.0",
     "antd": "4.9.4",
