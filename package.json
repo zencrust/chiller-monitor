@@ -7,7 +7,7 @@
     "@types/jest": "26.0.19",
     "@types/node": "14.14.16",
     "@types/react": "17.0.0",
-    "@types/react-dom": "17.0.0",
+    "@types/react-dom": "17.0.8",
     "antd": "4.9.4",
     "axios": "0.21.1",
     "immutability-helper": "3.1.1",
